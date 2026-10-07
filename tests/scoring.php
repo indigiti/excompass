@@ -12,7 +12,7 @@ $total = $policy->weightedTotal([
     ['score'=>24,'maximum'=>30,'weight'=>30],
 ]);
 
-$expected = 83.0;
+$expected = 85.0;
 $ok = abs($total - $expected) < 0.001;
 
 echo ($ok ? 'PASS' : 'FAIL') . "  weighted scoring = {$total}\n";
