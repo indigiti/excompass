@@ -51,13 +51,21 @@ document.addEventListener('DOMContentLoaded', () => {
   syncHeader();
   window.addEventListener('scroll', syncHeader, { passive: true });
 
+  document.querySelectorAll('[data-remote-image]').forEach((image) => {
+    image.addEventListener('error', () => image.classList.add('is-broken'));
+  });
+
   const galleryMain = document.querySelector('[data-gallery-main]');
+  const galleryImage = document.querySelector('[data-gallery-image]');
   const galleryCount = document.querySelector('[data-gallery-count]');
   document.querySelectorAll('[data-gallery-thumb]').forEach((button) => {
     button.addEventListener('click', () => {
       if (!galleryMain) return;
-      ['skin-1','skin-2','skin-3','skin-4'].forEach((skin) => galleryMain.classList.remove(skin));
-      galleryMain.classList.add(button.dataset.galleryThumb || 'skin-1');
+      const url = button.dataset.imageUrl || '';
+      if (galleryImage && url) {
+        galleryImage.classList.remove('is-broken');
+        galleryImage.src = url;
+      }
       if (galleryCount) galleryCount.textContent = button.dataset.index || '1';
       document.querySelectorAll('[data-gallery-thumb]').forEach((item) => item.classList.remove('active'));
       button.classList.add('active');
