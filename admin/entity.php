@@ -55,7 +55,8 @@ $audit = new JsonAuditLog($store);
 $isNew = ($_GET['new'] ?? '') === '1';
 $verticalSlug = trim((string) ($_GET['vertical'] ?? ''));
 $slug = trim((string) ($_GET['slug'] ?? ''));
-$rawEntity = $isNew ? null : $entities->find($verticalSlug, $slug);
+$citySlug = strtolower(trim((string) ($_GET['city'] ?? $cities->default()['slug'])));
+$rawEntity = $isNew ? null : $entities->findInCity($citySlug, $verticalSlug, $slug);
 $entity = $rawEntity;
 
 if (!$isNew && !$entity) {
@@ -89,6 +90,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 $before = $rawEntity;
+                $cityValue = strtolower(trim((string)($_POST['city_slug'] ?? ($entity['city_slug'] ?? $cities->default()['slug']))));
+                $cityRecord = $cities->find($cityValue);
+                if (!$cityRecord || empty($cityRecord['active'])) {
+                    throw new InvalidArgumentException('Choose an active city.');
+                }
                 $verticalValue = trim((string) ($_POST['vertical'] ?? ($entity['vertical'] ?? '')));
                 if (!$verticals->find($verticalValue)) {
                     throw new InvalidArgumentException('Choose a valid vertical.');
@@ -101,11 +107,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $payload = $entity ?: [];
                 $payload['id'] = $rawEntity['id'] ?? null;
+                $payload['city_slug'] = $cityValue;
+                $payload['city_name'] = (string)$cityRecord['name'];
                 $payload['vertical'] = $verticalValue;
                 $payload['slug'] = $newSlug;
                 $payload['name'] = trim((string) ($_POST['name'] ?? ''));
                 $payload['location'] = trim((string) ($_POST['location'] ?? ''));
-                $payload['locality'] = trim((string) ($_POST['locality'] ?? $payload['location']));
+                $areaName = trim((string)($_POST['area_name'] ?? $_POST['locality'] ?? $payload['location']));
+                $areaSlug = $areas->slug($areaName);
+                if ($areaName === '' || $areaSlug === '') {
+                    throw new InvalidArgumentException('Area / locality is required.');
+                }
+                $payload['area_name'] = $areaName;
+                $payload['area_slug'] = $areaSlug;
+                $payload['locality'] = $areaName;
                 $payload['score'] = $score;
                 $payload['highlight'] = trim((string) ($_POST['highlight'] ?? ''));
                 $payload['tags'] = admin_list((string)($_POST['tags'] ?? ''));
@@ -166,9 +181,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($payload['id'] === null) unset($payload['id']);
                 $rawEntity = $entities->save($payload);
                 $entity = $rawEntity;
-                $audit->record($user, $before ? 'entity.updated' : 'entity.created', 'entity', $rawEntity['vertical'].'/'.$rawEntity['slug'], $before, $rawEntity);
-                admin_flash('Entity and rich profile data saved.');
-                admin_redirect('entity.php?vertical='.rawurlencode($rawEntity['vertical']).'&slug='.rawurlencode($rawEntity['slug']));
+                $audit->record($user, $before ? 'entity.updated' : 'entity.created', 'entity', $rawEntity['city_slug'].'/'.$rawEntity['vertical'].'/'.$rawEntity['slug'], $before, $rawEntity);
+                admin_flash('Entity, city, area and rich profile data saved.');
+                admin_redirect('entity.php?city='.rawurlencode($rawEntity['city_slug']).'&vertical='.rawurlencode($rawEntity['vertical']).'&slug='.rawurlencode($rawEntity['slug']));
             }
 
             if ($action === 'transition') {
@@ -179,10 +194,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $from = (string) ($rawEntity['status'] ?? 'draft');
                 $workflow->assertTransition($user, $from, $to);
                 $before = $rawEntity;
-                $rawEntity = $entities->setStatus($rawEntity['vertical'], $rawEntity['slug'], $to);
-                $audit->record($user, 'entity.status_changed', 'entity', $rawEntity['vertical'].'/'.$rawEntity['slug'], $before, $rawEntity);
+                $rawEntity = $entities->setStatusInCity($rawEntity['city_slug'], $rawEntity['vertical'], $rawEntity['slug'], $to);
+                $audit->record($user, 'entity.status_changed', 'entity', $rawEntity['city_slug'].'/'.$rawEntity['vertical'].'/'.$rawEntity['slug'], $before, $rawEntity);
                 admin_flash("Status changed to {$to}.");
-                admin_redirect('entity.php?vertical='.rawurlencode($rawEntity['vertical']).'&slug='.rawurlencode($rawEntity['slug']));
+                admin_redirect('entity.php?city='.rawurlencode($rawEntity['city_slug']).'&vertical='.rawurlencode($rawEntity['vertical']).'&slug='.rawurlencode($rawEntity['slug']));
             }
         } catch (Throwable $exception) {
             $error = $exception->getMessage();
@@ -192,6 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if ($isNew && !$entity) {
     $entity = [
+        'city_slug'=>(string)$cities->default()['slug'],'city_name'=>(string)$cities->default()['name'],'area_name'=>'','area_slug'=>'',
         'vertical'=>'real-estate','slug'=>'','name'=>'','location'=>'','locality'=>'','score'=>0,'highlight'=>'','tags'=>[],'status'=>'draft',
         'category'=>'Apartment','tier'=>'₹1–2 Cr','availability'=>'2027','intent'=>'Family','primary'=>'','secondary'=>'','tertiary'=>'',
         'description'=>'','observation'=>'','best_for'=>[],'badges'=>[],'standout'=>[],'liked'=>[],'consider'=>[],'evidence'=>[],
@@ -213,7 +229,7 @@ $localityText = implode("\n", array_map(static fn($key,$value): string => $key.'
 $galleryText = implode("\n", (array)($entity['gallery_image_urls']??[]));
 admin_header($isNew ? 'New entity' : $entity['name'], $user);
 ?>
-<div class="admin-page-head"><div><span>ENTITY · RICH PROFILE</span><h1><?=e($isNew?'New entity':$entity['name'])?></h1></div><div class="admin-head-actions"><?php if(!$isNew):?><a href="<?=e(entity_url($entity['vertical'],$entity['slug']))?>" target="_blank" rel="noopener">Preview ↗</a><?php endif;?><a href="<?=e(u('admin/entities.php'))?>">← All entities</a></div></div>
+<div class="admin-page-head"><div><span>ENTITY · RICH PROFILE</span><h1><?=e($isNew?'New entity':$entity['name'])?></h1></div><div class="admin-head-actions"><?php if(!$isNew):?><a href="<?=e(entity_url($entity['vertical'],$entity['slug'],$entity['city_slug']))?>" target="_blank" rel="noopener">Preview ↗</a><?php endif;?><a href="<?=e(u('admin/entities.php'))?>">← All entities</a></div></div>
 <?php if($flash=admin_flash()):?><div class="admin-alert success"><?=e($flash)?></div><?php endif;?>
 <?php if($error):?><div class="admin-alert error"><?=e($error)?></div><?php endif;?>
 <div class="admin-grid entity-editor">
@@ -224,12 +240,13 @@ admin_header($isNew ? 'New entity' : $entity['name'], $user);
 
 <div class="admin-section-head"><span>Core identity</span><p>Required catalog fields and public ranking summary.</p></div>
 <div class="admin-form-grid">
+<label>City<select name="city_slug"><?php foreach($cities->active() as $cityOption):?><option value="<?=e($cityOption['slug'])?>" <?=$entity['city_slug']===$cityOption['slug']?'selected':''?>><?=e($cityOption['name'])?> · <?=e($cityOption['state'])?></option><?php endforeach;?></select></label>
 <label>Vertical<select name="vertical" <?=$isNew?'':'disabled'?>><?php foreach($verticals->all() as $v):?><option value="<?=e($v['slug'])?>" <?=$entity['vertical']===$v['slug']?'selected':''?>><?=e($v['name'])?></option><?php endforeach;?></select></label>
 <?php if(!$isNew):?><input type="hidden" name="vertical" value="<?=e($entity['vertical'])?>"><?php endif;?>
 <label>Slug<input name="slug" value="<?=e($entity['slug'])?>" pattern="[a-z0-9-]+" required <?=$isNew?'':'readonly'?>></label>
 <label>Name<input name="name" value="<?=e($entity['name'])?>" required></label>
-<label>Location<input name="location" value="<?=e($entity['location'])?>" required></label>
-<label>Locality<input name="locality" value="<?=e((string)($entity['locality']??$entity['location']))?>"></label>
+<label>Location / address<input name="location" value="<?=e($entity['location'])?>" required></label>
+<label>Area / locality<input name="area_name" value="<?=e((string)($entity['area_name']??$entity['locality']??$entity['location']))?>" required><small>Stored as city-scoped area; slug is generated automatically.</small></label>
 <?php if($access->allows($user,'scores.edit')):?><label>Current score <small>0–100; criterion rows are regenerated from this score.</small><input type="number" name="score" min="0" max="100" value="<?=e((string)$entity['score'])?>"></label><?php else:?><div class="read-only-field"><span>Current score</span><b><?=e((string)$entity['score'])?></b></div><?php endif;?>
 </div>
 <label>Highlight<textarea name="highlight" rows="3"><?=e((string)$entity['highlight'])?></textarea></label>
