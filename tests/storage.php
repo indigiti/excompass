@@ -41,6 +41,9 @@ $checks['first admin created']=in_array('admin',$firstAdmin['roles']??[],true)&&
 $duplicateBlocked=false;
 try{$users->createFirstAdmin('Second Admin','admin2@example.com',password_hash('temporary-admin-password',PASSWORD_DEFAULT));}catch(InvalidArgumentException){$duplicateBlocked=true;}
 $checks['second first-admin bootstrap blocked']=$duplicateBlocked;
+$updatedAdmin=$users->updatePassword((int)$firstAdmin['id'],password_hash('new-temporary-admin-password',PASSWORD_DEFAULT));
+$checks['password updated']=password_verify('new-temporary-admin-password',(string)($updatedAdmin['password_hash']??''));
+$checks['old password replaced']=!password_verify('temporary-admin-password',(string)($updatedAdmin['password_hash']??''));
 
 $workflow=new EntityWorkflow(new Access());
 $checks['editor can approve']=$workflow->canTransition($user,'review','approved');
