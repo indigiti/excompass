@@ -37,6 +37,7 @@ use ExCompass\Support\Icon;
 $config=require dirname(__DIR__).'/config/app.php';
 $storageConfig=require dirname(__DIR__).'/config/storage.php';
 $authConfig=require dirname(__DIR__).'/config/auth.php';
+$cityConfig=require dirname(__DIR__).'/config/cities.php';
 
 if (($storageConfig['driver'] ?? 'json') !== 'json') {
     throw new RuntimeException('Only the JSON runtime adapter is enabled. Database schemas are compatibility assets only.');
@@ -54,7 +55,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 
 $verticals=new VerticalRepository();
-$cities=new CityRepository();
+$cities=new CityRepository($cityConfig);
 $areas=new AreaDirectory();
 $defaultCity=$cities->default();
 $verticalDetails=new VerticalDetailRepository();
