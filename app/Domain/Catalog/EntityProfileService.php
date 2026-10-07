@@ -5,8 +5,10 @@ namespace ExCompass\Domain\Catalog;
 
 final class EntityProfileService
 {
-    public function __construct(private readonly VerticalDetailRepository $details)
-    {
+    public function __construct(
+        private readonly VerticalDetailRepository $details,
+        private readonly RemoteMediaCatalog $media
+    ) {
     }
 
     public function enrich(array $entity, int $index = 0): array
@@ -66,7 +68,7 @@ final class EntityProfileService
             $entity = $this->realEstateDetails($entity, $index);
         }
 
-        return $entity;
+        return $this->media->enrich($entity, $index);
     }
 
     private function realEstateDetails(array $entity, int $index): array
