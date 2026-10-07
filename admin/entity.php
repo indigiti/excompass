@@ -12,6 +12,10 @@ function admin_list(string $value): array
 {
     return array_values(array_filter(array_map('trim', preg_split('/[\r\n,]+/', $value) ?: [])));
 }
+function admin_lines(string $value): array
+{
+    return array_values(array_filter(array_map('trim', preg_split('/\R+/', $value) ?: [])));
+}
 function admin_pairs(string $value, bool $numeric = false): array
 {
     $out = [];
@@ -107,10 +111,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $payload['observation'] = trim((string)($_POST['observation'] ?? ''));
                 $payload['best_for'] = admin_list((string)($_POST['best_for'] ?? ''));
                 $payload['badges'] = admin_list((string)($_POST['badges'] ?? ''));
-                $payload['standout'] = admin_list((string)($_POST['standout'] ?? ''));
-                $payload['liked'] = admin_list((string)($_POST['liked'] ?? ''));
-                $payload['consider'] = admin_list((string)($_POST['consider'] ?? ''));
-                $payload['evidence'] = admin_list((string)($_POST['evidence'] ?? ''));
+                $payload['standout'] = admin_lines((string)($_POST['standout'] ?? ''));
+                $payload['liked'] = admin_lines((string)($_POST['liked'] ?? ''));
+                $payload['consider'] = admin_lines((string)($_POST['consider'] ?? ''));
+                $payload['evidence'] = admin_lines((string)($_POST['evidence'] ?? ''));
                 $payload['reviewer'] = trim((string)($_POST['reviewer'] ?? 'ExCompass Research Desk'));
                 $payload['review_date'] = trim((string)($_POST['review_date'] ?? date('Y-m-d')));
                 $payload['score_version'] = trim((string)($_POST['score_version'] ?? '1.2-demo'));
