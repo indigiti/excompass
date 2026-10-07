@@ -4,18 +4,20 @@ require __DIR__.'/runtime.php';
 
 $vs=trim((string)($_GET['vertical']??''));
 $slug=trim((string)($_GET['slug']??''));
+$citySlug=current_city_slug();
+$city=$cities->find($citySlug)??$cities->default();
 $v=$verticals->find($vs);
-$x=find_published_entity($vs,$slug);
+$x=find_published_entity($vs,$slug,$citySlug);
 if(!$v||!$x){http_response_code(404);page_header('Profile not found');echo '<main id="content" class="shell section"><h1>Profile not found</h1></main>';page_footer();exit;}
 $detail=vertical_detail($vs);
-$list=$ranking->rank(published_for_vertical($vs));
+$list=$ranking->rank(published_for_vertical($vs,$citySlug));
 $rank=1;foreach($list as $item)if($item['slug']===$slug)$rank=$item['rank'];
 $news=related_demo_news($vs,$x['locality']);
 $gallery=array_values(array_filter((array)($x['gallery_image_urls']??[])));
 page_header($x['name']);
 ?>
 <main id="content" class="shell rich-profile">
-  <nav class="profile-crumbs" aria-label="Breadcrumb"><a href="<?=e(u())?>">Discover</a><span>›</span><a href="<?=e(vertical_url($vs))?>"><?=e($v['name'])?></a><span>›</span><b><?=e($x['name'])?></b></nav>
+  <nav class="profile-crumbs" aria-label="Breadcrumb"><a href="<?=e(u())?>">Discover</a><span>›</span><a href="<?=e(city_url($citySlug))?>"><?=e((string)$city['name'])?></a><span>›</span><a href="<?=e(area_url($citySlug,$x['area_slug']))?>"><?=e($x['area_name'])?></a><span>›</span><a href="<?=e(vertical_url($vs,$citySlug))?>"><?=e($v['name'])?></a><span>›</span><b><?=e($x['name'])?></b></nav>
 
   <section class="profile-showcase" data-reveal>
     <div class="media-gallery">
@@ -26,11 +28,11 @@ page_header($x['name']);
     </div>
     <div class="profile-summary">
       <div class="profile-labels"><?php if($x['editorial_status']==='featured'):?><span class="featured-pill">Featured · visibility only</span><?php else:?><span class="ranking-pill">Independent ranking</span><?php endif;?><span>Demo working profile</span></div>
-      <div class="profile-title-grid"><div><span class="eyebrow">#<?=e((string)$rank)?> · <?=e($detail['singular'])?></span><h1><?=e($x['name'])?></h1><p class="profile-location"><?=e($x['locality'])?> · Pune</p></div><div class="score-medallion"><strong><?=e((string)$x['score'])?></strong><b><?=e($x['rating'])?></b><span>ExCompass score</span></div></div>
+      <div class="profile-title-grid"><div><span class="eyebrow">#<?=e((string)$rank)?> · <?=e($detail['singular'])?></span><h1><?=e($x['name'])?></h1><p class="profile-location"><?=e($x['area_name'])?> · <?=e((string)$city['name'])?></p></div><div class="score-medallion"><strong><?=e((string)$x['score'])?></strong><b><?=e($x['rating'])?></b><span>ExCompass score</span></div></div>
       <p class="profile-description"><?=e($x['description'])?></p>
       <div class="profile-fact-grid"><div><small><?=e($detail['category_label'])?></small><b><?=e($x['category'])?></b></div><div><small><?=e($detail['tier_label'])?></small><b><?=e($x['tier'])?></b></div><div><small><?=e($detail['status_label'])?></small><b><?=e($x['availability'])?></b></div><div><small>Key detail</small><b><?=e($x['tertiary'])?></b></div></div>
-      <div class="profile-actions"><a class="premium-btn primary" href="<?=e(u('brochure.php?vertical='.rawurlencode($vs).'&slug='.rawurlencode($slug)))?>">Get profile brief</a><button class="premium-btn ghost" data-open-lead data-vertical="<?=e($vs)?>" data-entity="<?=e($slug)?>" data-type="visit">Request visit / appointment</button><button class="premium-btn ghost" data-open-lead data-vertical="<?=e($vs)?>" data-entity="<?=e($slug)?>" data-type="callback">Request callback</button></div>
-      <?php if($x['badges']):?><div class="profile-badges"><?php foreach($x['badges'] as $badge):?><span>✦ <?=e($badge)?></span><?php endforeach;?><a href="<?=e(u('badge.php?vertical='.rawurlencode($vs).'&slug='.rawurlencode($slug)))?>">Download badge SVG</a></div><?php endif;?>
+      <div class="profile-actions"><a class="premium-btn primary" href="<?=e(u('brochure.php?city='.rawurlencode($citySlug).'&vertical='.rawurlencode($vs).'&slug='.rawurlencode($slug)))?>">Get profile brief</a><button class="premium-btn ghost" data-open-lead data-city="<?=e($citySlug)?>" data-vertical="<?=e($vs)?>" data-entity="<?=e($slug)?>" data-type="visit">Request visit / appointment</button><button class="premium-btn ghost" data-open-lead data-city="<?=e($citySlug)?>" data-vertical="<?=e($vs)?>" data-entity="<?=e($slug)?>" data-type="callback">Request callback</button></div>
+      <?php if($x['badges']):?><div class="profile-badges"><?php foreach($x['badges'] as $badge):?><span>✦ <?=e($badge)?></span><?php endforeach;?><a href="<?=e(u('badge.php?city='.rawurlencode($citySlug).'&vertical='.rawurlencode($vs).'&slug='.rawurlencode($slug)))?>">Download badge SVG</a></div><?php endif;?>
     </div>
   </section>
 
@@ -64,6 +66,6 @@ page_header($x['name']);
     <aside class="commercial-disclosure"><span class="sponsored-pill">Commercial layer</span><h2>Ranking stays independent.</h2><p>Featured and Sponsored inventory may affect visibility, but cannot alter ExCompass score or rank.</p></aside>
   </section>
 
-  <section class="compare-callout" data-reveal><div><span class="eyebrow">Decision tool</span><h2>Compare <?=e($v['name'])?></h2><p>Select up to three profiles from the ranking page to compare score criteria and category attributes side by side.</p></div><a class="premium-btn primary" href="<?=e(vertical_url($vs))?>">Choose profiles to compare</a></section>
+  <section class="compare-callout" data-reveal><div><span class="eyebrow">Decision tool</span><h2>Compare <?=e($v['name'])?></h2><p>Select up to three profiles from the ranking page to compare score criteria and category attributes side by side.</p></div><a class="premium-btn primary" href="<?=e(vertical_url($vs,$citySlug))?>">Choose profiles to compare</a></section>
 </main>
 <?php page_footer(); ?>
