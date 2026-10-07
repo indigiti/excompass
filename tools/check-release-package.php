@@ -8,7 +8,7 @@ $required=[
  'public/methodology.php','public/health.php','public/compare.php','public/report.php','public/brochure.php','public/badge.php','public/lead.php','public/city.php','public/area.php',
  'public/assets/css/app.css','public/assets/css/admin.css','public/assets/js/app.js','public/admin/index.php','public/admin/login.php','public/admin/leads.php','public/admin/entity.php',
  'private/app/bootstrap.php','private/app/Domain/Catalog/DemoEntityCatalog.php','private/app/Domain/Catalog/VerticalDetailRepository.php','private/app/Domain/Catalog/RemoteMediaCatalog.php','private/app/Domain/Media/RemoteImagePolicy.php',
- 'private/app/Domain/Catalog/EntityProfileService.php','private/app/Domain/Geo/CityRepository.php','private/app/Domain/Geo/AreaDirectory.php','private/config/app.php','private/config/storage.php','private/config/auth.php',
+ 'private/app/Domain/Catalog/EntityProfileService.php','private/app/Domain/Geo/CityRepository.php','private/app/Domain/Geo/AreaDirectory.php','private/config/app.php','private/config/cities.php','private/config/storage.php','private/config/auth.php',
  'private/bin/create-admin.php','private/database/migrations/001_core.sql','private/build/release.json',
 ];
 foreach($required as $path)must(is_file($release.'/'.$path),"payload missing: {$path}");
@@ -40,8 +40,10 @@ $entityPage=(string)file_get_contents($release.'/public/entity.php');
 must(str_contains($entityPage,'image_disclaimer'),'image provenance disclosure missing');
 must(str_contains($entityPage,'gallery_image_urls'),'remote gallery rendering missing');
 $geo=(string)file_get_contents($release.'/private/app/Domain/Geo/CityRepository.php');
-must(str_contains($geo,"'pune'"),'Pune city registry missing');
-must(!str_contains($geo,"'mumbai'"),'unexpected second city in registry');
+must(str_contains($geo,'__construct'),'config-backed city repository missing');
+$cityConfig=(string)file_get_contents($release.'/private/config/cities.php');
+must(str_contains($cityConfig,"'pune'"),'Pune city registry missing');
+must(!str_contains($cityConfig,"'mumbai'"),'unexpected second city in registry');
 $repository=(string)file_get_contents($release.'/private/app/Infrastructure/Storage/JsonEntityRepository.php');
 must(str_contains($repository,'city_slug'),'city-scoped entity identity missing');
 must(str_contains($repository,'area_slug'),'area-scoped entity identity missing');
