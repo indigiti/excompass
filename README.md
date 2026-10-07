@@ -55,6 +55,7 @@ Admin edits persist to JSON with locking and atomic replacement. The future MySQ
 - rich profile editor for decision facts, editorial notes, locality data, evidence and remote image URLs
 - enquiry inbox for permitted Admin/Commercial roles
 - DigiOps split-layout Admin runtime uses private-root dependencies and is HTTP smoke-tested
+- one-time web bootstrap creates the first admin when no admin-role account exists, then permanently locks setup
 - public pages expose published records only
 
 ## DigiOps deployment
@@ -64,7 +65,7 @@ Every successful push to main produces the artifact named digiops-release.
 Release contract:
 
 - schema: DIGIOPS-RELEASE/1
-- version: 1.4.1
+- version: 1.4.2
 - browser route: /excompass/
 - public target: public_html/excompass/
 - private target: private_html/excompass/
