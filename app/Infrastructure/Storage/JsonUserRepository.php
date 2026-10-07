@@ -36,10 +36,7 @@ final class JsonUserRepository implements UserRepositoryInterface
     public function hasAdmin(): bool
     {
         foreach ($this->store->read('users.json') as $user) {
-            if (
-                in_array('admin', (array)($user['roles'] ?? []), true) &&
-                ($user['status'] ?? 'disabled') === 'active'
-            ) {
+            if (in_array('admin', (array)($user['roles'] ?? []), true)) {
                 return true;
             }
         }
@@ -66,10 +63,7 @@ final class JsonUserRepository implements UserRepositoryInterface
             $maxId = 0;
             foreach ($users as $user) {
                 $maxId = max($maxId, (int)($user['id'] ?? 0));
-                if (
-                    in_array('admin', (array)($user['roles'] ?? []), true) &&
-                    ($user['status'] ?? 'disabled') === 'active'
-                ) {
+                if (in_array('admin', (array)($user['roles'] ?? []), true)) {
                     throw new InvalidArgumentException('An administrator already exists.');
                 }
                 if (strtolower((string)($user['email'] ?? '')) === $email) {
