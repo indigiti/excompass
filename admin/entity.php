@@ -28,6 +28,16 @@ function admin_pairs(string $value, bool $numeric = false): array
     }
     return $out;
 }
+function admin_https_url(string $value): ?string
+{
+    $value = trim($value);
+    if ($value === '') return null;
+    $parts = parse_url($value);
+    if (!is_array($parts) || strtolower((string)($parts['scheme'] ?? '')) !== 'https' || empty($parts['host'])) {
+        return null;
+    }
+    return $value;
+}
 function admin_nearby(string $value): array
 {
     $out = [];
@@ -118,6 +128,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $payload['reviewer'] = trim((string)($_POST['reviewer'] ?? 'ExCompass Research Desk'));
                 $payload['review_date'] = trim((string)($_POST['review_date'] ?? date('Y-m-d')));
                 $payload['score_version'] = trim((string)($_POST['score_version'] ?? '1.2-demo'));
+
+                $heroInput = trim((string)($_POST['hero_image_url'] ?? ''));
+                $heroUrl = $remoteImages->sanitize($heroInput);
+                if ($heroInput !== '' && $heroUrl === null) {
+                    throw new InvalidArgumentException('Hero image must be an HTTPS URL on an approved image host.');
+                }
+                $galleryInput = admin_lines((string)($_POST['gallery_image_urls'] ?? ''));
+                $galleryUrls = $remoteImages->sanitizeMany($galleryInput, 8);
+                if (count($galleryUrls) !== count($galleryInput)) {
+                    throw new InvalidArgumentException('Every gallery image must be an HTTPS URL on an approved image host.');
+                }
+                $sourceInput = trim((string)($_POST['image_source_url'] ?? ''));
+                $sourceUrl = admin_https_url($sourceInput);
+                if ($sourceInput !== '' && $sourceUrl === null) {
+                    throw new InvalidArgumentException('Image source URL must use HTTPS.');
+                }
+                $payload['hero_image_url'] = $heroUrl;
+                $payload['gallery_image_urls'] = $galleryUrls;
+                $payload['image_alt'] = trim((string)($_POST['image_alt'] ?? ''));
+                $payload['image_source_name'] = trim((string)($_POST['image_source_name'] ?? ''));
+                $payload['image_source_url'] = $sourceUrl;
+                $payload['image_credit'] = trim((string)($_POST['image_credit'] ?? ''));
+                $payload['image_verified'] = ($_POST['image_verified'] ?? '') === '1';
+
                 $nearby = admin_nearby((string)($_POST['nearby'] ?? ''));
                 if ($nearby) $payload['nearby'] = $nearby;
                 $localityScores = admin_pairs((string)($_POST['locality_scores'] ?? ''), true);
@@ -162,6 +196,7 @@ if ($isNew && !$entity) {
         'category'=>'Apartment','tier'=>'₹1–2 Cr','availability'=>'2027','intent'=>'Family','primary'=>'','secondary'=>'','tertiary'=>'',
         'description'=>'','observation'=>'','best_for'=>[],'badges'=>[],'standout'=>[],'liked'=>[],'consider'=>[],'evidence'=>[],
         'reviewer'=>'ExCompass Research Desk','review_date'=>date('Y-m-d'),'score_version'=>'1.2-demo','nearby'=>[],'locality_scores'=>[],'coordinates'=>[18.5204,73.8567],
+        'hero_image_url'=>null,'gallery_image_urls'=>[],'image_alt'=>'','image_source_name'=>'','image_source_url'=>null,'image_credit'=>'','image_verified'=>false,
     ];
 }
 if (!$isNew && $rawEntity) {
@@ -175,6 +210,7 @@ $detail = vertical_detail((string)$entity['vertical']);
 $transitions = $isNew ? [] : $workflow->available($user, (string) $rawEntity['status']);
 $nearbyText = implode("\n", array_map(static fn(array $row): string => ($row['name']??'').'|'.($row['time']??''), (array)($entity['nearby']??[])));
 $localityText = implode("\n", array_map(static fn($key,$value): string => $key.'|'.$value, array_keys((array)($entity['locality_scores']??[])), array_values((array)($entity['locality_scores']??[]))));
+$galleryText = implode("\n", (array)($entity['gallery_image_urls']??[]));
 admin_header($isNew ? 'New entity' : $entity['name'], $user);
 ?>
 <div class="admin-page-head"><div><span>ENTITY · RICH PROFILE</span><h1><?=e($isNew?'New entity':$entity['name'])?></h1></div><div class="admin-head-actions"><?php if(!$isNew):?><a href="<?=e(entity_url($entity['vertical'],$entity['slug']))?>" target="_blank" rel="noopener">Preview ↗</a><?php endif;?><a href="<?=e(u('admin/entities.php'))?>">← All entities</a></div></div>
@@ -220,6 +256,18 @@ admin_header($isNew ? 'New entity' : $entity['name'], $user);
 <label>What we liked <small>one item per line</small><textarea name="liked" rows="6"><?=e(implode("\n", (array)$entity['liked']))?></textarea></label>
 <label>What to consider <small>one item per line</small><textarea name="consider" rows="6"><?=e(implode("\n", (array)$entity['consider']))?></textarea></label>
 </div>
+
+<div class="admin-section-head"><span>Remote photography</span><p>Only URLs are stored. Image files are never copied into ExCompass.</p></div>
+<div class="remote-media-admin-note">Allowed image hosts: <?=e(implode(', ', $remoteImages->allowedHosts()))?>. Demo photos are representative unless “verified entity imagery” is checked.</div>
+<label>Hero image URL<input type="url" name="hero_image_url" value="<?=e((string)($entity['hero_image_url']??''))?>" placeholder="https://images.unsplash.com/..."></label>
+<label>Gallery image URLs <small>one HTTPS URL per line, maximum 8</small><textarea name="gallery_image_urls" rows="6"><?=e($galleryText)?></textarea></label>
+<div class="admin-form-grid">
+<label>Image alt text<input name="image_alt" value="<?=e((string)($entity['image_alt']??''))?>"></label>
+<label>Source name<input name="image_source_name" value="<?=e((string)($entity['image_source_name']??''))?>" placeholder="Official website, Unsplash, Wikimedia..."></label>
+<label>Source page URL<input type="url" name="image_source_url" value="<?=e((string)($entity['image_source_url']??''))?>"></label>
+<label>Credit / licence note<input name="image_credit" value="<?=e((string)($entity['image_credit']??''))?>"></label>
+</div>
+<label class="admin-check"><input type="checkbox" name="image_verified" value="1" <?=!empty($entity['image_verified'])?'checked':''?>> Verified as imagery of this specific entity</label>
 
 <div class="admin-section-head"><span>Location intelligence</span><p>Working map coordinates, nearby travel times and locality scores.</p></div>
 <div class="admin-form-grid">
