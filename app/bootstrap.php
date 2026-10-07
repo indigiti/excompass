@@ -146,8 +146,9 @@ function find_published_entity(string $vertical,string $slug,?string $citySlug=n
     return null;
 }
 function areas_for_city(?string $citySlug=null): array {
-    global $areas,$entities;
-    return $areas->fromEntities($entities->all(),$citySlug??current_city_slug());
+    global $areas;
+    $citySlug=$citySlug??current_city_slug();
+    return $areas->fromEntities(published_entities($citySlug),$citySlug);
 }
 function related_demo_news(string $vertical,string $locality,int $limit=4): array {
     $news=[
