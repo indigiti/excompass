@@ -22,6 +22,11 @@ $checks=[
     'rich profile budget'=>($godrej['tier']??'')==='₹1–2 Cr',
     'rich profile breakdown'=>count($godrej['breakdown']??[])===7,
     'rich profile evidence'=>count($godrej['evidence']??[])>=4,
+    'remote hero image'=>str_starts_with((string)($godrej['hero_image_url']??''),'https://images.unsplash.com/'),
+    'remote gallery images'=>count($godrej['gallery_image_urls']??[])>=2,
+    'remote image marked representative'=>($godrej['image_verified']??true)===false,
+    'reject http image'=>$remoteImages->sanitize('http://images.unsplash.com/photo.jpg')===null,
+    'reject unapproved host'=>$remoteImages->sanitize('https://example.com/photo.jpg')===null,
     'search Baner'=>count($search->search(published_entities(),$verticals->all(),'Baner'))>=5,
     'subdirectory URL'=>u('search.php')===(($config['base_path']?:'').'/search.php'),
 ];
