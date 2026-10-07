@@ -17,6 +17,11 @@ The public experience is built as a premium editorial discovery product rather t
 - reduced-motion accessibility support
 - cross-category search
 - explainable ranking/profile views
+- category-specific filters and decision facts
+- rich score breakdowns, evidence/version provenance and locality intelligence
+- compare and ranking-report workflows
+- downloadable profile briefs and ranking badges
+- JSON-backed enquiry capture with Admin inbox
 
 The development seed catalog contains exactly **105 published demo profiles** so the whole product can be tested without manual setup:
 
@@ -41,6 +46,8 @@ Admin edits persist to JSON with locking and atomic replacement. The future MySQ
 - Admin / Editor / Researcher / Commercial RBAC
 - Draft -> Review -> Approved -> Published workflow
 - audit trail
+- rich profile editor for decision facts, editorial notes, locality data and evidence
+- enquiry inbox for permitted Admin/Commercial roles
 - public pages expose published records only
 
 ## DigiOps deployment
@@ -50,7 +57,7 @@ Every successful push to main produces the artifact named digiops-release.
 Release contract:
 
 - schema: DIGIOPS-RELEASE/1
-- version: 1.1.0
+- version: 1.2.0
 - browser route: /excompass/
 - public target: public_html/excompass/
 - private target: private_html/excompass/
@@ -67,4 +74,4 @@ Then open /excompass/admin/.
 
 ## Quality gates
 
-CI validates PHP syntax, 105-record seed integrity, scoring, JSON persistence, RBAC workflow, HTTP rendering and the exact DigiOps release payload.
+CI validates PHP syntax, 105-record seed integrity, rich profile metadata, scoring, JSON persistence, RBAC workflow, homepage/ranking/profile/compare/report HTTP rendering and the exact DigiOps release payload.
