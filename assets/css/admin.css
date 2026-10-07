@@ -45,3 +45,13 @@
 .admin-setup{width:min(470px,100%)}
 .setup-kicker{margin-top:24px;font-size:9px;font-weight:900;letter-spacing:.14em;color:#9b7540}
 .admin-setup h1{margin-top:8px}
+
+.admin-user-link{color:#fff;font-weight:800;text-decoration:none}
+.account-grid{grid-template-columns:minmax(260px,.7fr) minmax(360px,1.3fr)}
+.account-details{margin:0;display:grid;gap:0}
+.account-details>div{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:13px 0;border-bottom:1px solid #eaecf0}
+.account-details>div:last-child{border-bottom:0}
+.account-details dt{font-size:10px;color:#667085;font-weight:800}
+.account-details dd{margin:0;font-size:12px;font-weight:800}
+.password-form{margin-top:16px}
+@media(max-width:780px){.account-grid{grid-template-columns:1fr}}
