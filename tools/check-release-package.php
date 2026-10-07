@@ -16,7 +16,7 @@ $meta=json_decode((string)file_get_contents($release.'/RELEASE.json'),true);
 must(is_array($meta),'invalid RELEASE.json');
 must(($meta['schema']??'')==='DIGIOPS-RELEASE/1','release schema mismatch');
 must(($meta['name']??'')==='ExCompass','release name mismatch');
-must(($meta['version']??'')==='1.4.0','release version mismatch');
+must(($meta['version']??'')==='1.4.1','release version mismatch');
 must(($meta['publicPath']??'')==='public_html/excompass/','public path mismatch');
 must(($meta['privatePath']??'')==='private_html/excompass/','private path mismatch');
 must(($meta['persistentPaths']??[])===['storage/'],'persistent storage contract mismatch');
