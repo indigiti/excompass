@@ -1,3 +1,18 @@
+CREATE TABLE cities (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    slug VARCHAR(120) NOT NULL UNIQUE,
+    name VARCHAR(190) NOT NULL,
+    state VARCHAR(190) NULL,
+    country VARCHAR(120) NOT NULL DEFAULT 'India',
+    latitude DECIMAL(10,7) NULL,
+    longitude DECIMAL(10,7) NULL,
+    status ENUM('draft','active','archived') NOT NULL DEFAULT 'draft',
+    is_default TINYINT(1) NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_city_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE verticals (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     slug VARCHAR(120) NOT NULL UNIQUE,
@@ -12,7 +27,7 @@ CREATE TABLE verticals (
 
 CREATE TABLE localities (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    city VARCHAR(120) NOT NULL,
+    city_id BIGINT UNSIGNED NOT NULL,
     slug VARCHAR(160) NOT NULL,
     name VARCHAR(190) NOT NULL,
     latitude DECIMAL(10,7) NULL,
@@ -20,11 +35,14 @@ CREATE TABLE localities (
     status ENUM('draft','active','archived') NOT NULL DEFAULT 'draft',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_locality_city_slug (city, slug)
+    UNIQUE KEY uq_locality_city_slug (city_id, slug),
+    KEY idx_locality_city_status (city_id, status),
+    CONSTRAINT fk_locality_city FOREIGN KEY (city_id) REFERENCES cities(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE entities (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    city_id BIGINT UNSIGNED NOT NULL,
     vertical_id BIGINT UNSIGNED NOT NULL,
     primary_locality_id BIGINT UNSIGNED NULL,
     slug VARCHAR(190) NOT NULL,
@@ -38,8 +56,10 @@ CREATE TABLE entities (
     published_at DATETIME NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_entity_vertical_slug (vertical_id, slug),
-    KEY idx_entity_status (status),
+    UNIQUE KEY uq_entity_city_vertical_slug (city_id, vertical_id, slug),
+    KEY idx_entity_city_status (city_id, status),
+    KEY idx_entity_locality (primary_locality_id),
+    CONSTRAINT fk_entity_city FOREIGN KEY (city_id) REFERENCES cities(id),
     CONSTRAINT fk_entity_vertical FOREIGN KEY (vertical_id) REFERENCES verticals(id),
     CONSTRAINT fk_entity_locality FOREIGN KEY (primary_locality_id) REFERENCES localities(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -125,13 +145,19 @@ CREATE TABLE score_items (
 
 CREATE TABLE ranking_versions (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    city_id BIGINT UNSIGNED NOT NULL,
+    locality_id BIGINT UNSIGNED NULL,
     vertical_id BIGINT UNSIGNED NOT NULL,
+    scope_key VARCHAR(190) NOT NULL DEFAULT 'city',
     version VARCHAR(80) NOT NULL,
     title VARCHAR(255) NOT NULL,
     status ENUM('draft','published','superseded') NOT NULL DEFAULT 'draft',
     published_at DATETIME NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_ranking_version (vertical_id, version),
+    UNIQUE KEY uq_ranking_scope_version (city_id, vertical_id, scope_key, version),
+    KEY idx_ranking_city_vertical_status (city_id, vertical_id, status),
+    CONSTRAINT fk_ranking_version_city FOREIGN KEY (city_id) REFERENCES cities(id),
+    CONSTRAINT fk_ranking_version_locality FOREIGN KEY (locality_id) REFERENCES localities(id),
     CONSTRAINT fk_ranking_version_vertical FOREIGN KEY (vertical_id) REFERENCES verticals(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -174,8 +200,10 @@ CREATE TABLE role_user (
 
 CREATE TABLE leads (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    city_id BIGINT UNSIGNED NOT NULL,
+    locality_id BIGINT UNSIGNED NULL,
     entity_id BIGINT UNSIGNED NULL,
-    lead_type ENUM('enquiry','callback','visit','appointment') NOT NULL DEFAULT 'enquiry',
+    lead_type ENUM('enquiry','callback','visit','appointment','sponsored-enquiry') NOT NULL DEFAULT 'enquiry',
     name VARCHAR(190) NOT NULL,
     phone VARCHAR(60) NULL,
     email VARCHAR(190) NULL,
@@ -183,7 +211,9 @@ CREATE TABLE leads (
     status ENUM('new','contacted','qualified','appointment','converted','closed','spam') NOT NULL DEFAULT 'new',
     source_url VARCHAR(2048) NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    KEY idx_lead_status_created (status, created_at),
+    KEY idx_lead_city_status_created (city_id, status, created_at),
+    CONSTRAINT fk_lead_city FOREIGN KEY (city_id) REFERENCES cities(id),
+    CONSTRAINT fk_lead_locality FOREIGN KEY (locality_id) REFERENCES localities(id) ON DELETE SET NULL,
     CONSTRAINT fk_lead_entity FOREIGN KEY (entity_id) REFERENCES entities(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
