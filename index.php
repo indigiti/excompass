@@ -16,6 +16,8 @@ foreach($featuredSlugs as $slug){
     if(isset($tops[$slug])){$featured[]=['vertical'=>$verticals->find($slug),'entity'=>$tops[$slug]];}
 }
 $localities=$ranking->rank(published_for_vertical('localities',$citySlug));
+$cityAreas=areas_for_city($citySlug);
+$trendArea=$cityAreas[0]??null;
 page_header($city['name'].', edited for better decisions');
 ?>
 <main id="content">
@@ -29,7 +31,7 @@ page_header($city['name'].', edited for better decisions');
         <input name="q" aria-label="Search ExCompass" placeholder="Search a neighbourhood, school, hospital or need">
         <input type="hidden" name="city" value="<?=e($citySlug)?>"><button>Explore <?=e((string)$city['name'])?></button>
       </form>
-      <div class="hero-trends"><span>Trending now</span><a href="<?=e(vertical_url('real-estate',$citySlug))?>">Homes in <?=e((string)$city['name'])?></a><a href="<?=e(area_url($citySlug,'baner'))?>">Baner</a><a href="<?=e(vertical_url('schools',$citySlug))?>">Schools</a><a href="<?=e(vertical_url('weekend',$citySlug))?>">Weekend escapes</a></div>
+      <div class="hero-trends"><span>Trending now</span><a href="<?=e(vertical_url('real-estate',$citySlug))?>">Homes in <?=e((string)$city['name'])?></a><?php if($trendArea):?><a href="<?=e(area_url($citySlug,$trendArea['slug']))?>"><?=e($trendArea['name'])?></a><?php endif;?><a href="<?=e(vertical_url('schools',$citySlug))?>">Schools</a><a href="<?=e(vertical_url('weekend',$citySlug))?>">Weekend escapes</a></div>
     </div>
     <div class="hero-visual" data-reveal data-tilt>
       <div class="visual-frame">
