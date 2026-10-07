@@ -127,7 +127,18 @@ function safe_return_path(?string $path): string {
 
 function page_header(string $title): void {
     global $config,$verticals;
-    ?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b0d"><meta name="color-scheme" content="light"><title><?=e($title)?> · <?=e($config['name'])?></title><meta name="description" content="Independent rankings, comparisons and local intelligence for <?=e($config['city'])?>."><link rel="stylesheet" href="<?=e(u('assets/css/app.css?v=20261007-remote-media-1'))?>"></head><body>
+    $activeVertical=trim((string)($_GET['vertical']??''));
+    if(!$verticals->find($activeVertical)){
+        $activeVertical='';
+        $requestPath=(string)(parse_url((string)($_SERVER['REQUEST_URI']??''),PHP_URL_PATH)??'');
+        foreach($verticals->all() as $candidate){
+            if(preg_match('~(?:^|/)'.preg_quote($candidate['slug'],'~').'(?:/|$)~',$requestPath)){
+                $activeVertical=$candidate['slug'];
+                break;
+            }
+        }
+    }
+    ?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b0d"><meta name="color-scheme" content="light"><title><?=e($title)?> · <?=e($config['name'])?></title><meta name="description" content="Independent rankings, comparisons and local intelligence for <?=e($config['city'])?>."><link rel="stylesheet" href="<?=e(u('assets/css/app.css?v=20261007-header-2'))?>"></head><body>
     <a class="skip-link" href="#content">Skip to content</a>
     <header class="site-header" data-header>
       <div class="shell nav">
@@ -147,7 +158,7 @@ function page_header(string $title): void {
         <a href="<?=e(u())?>">Discover</a><a href="<?=e(vertical_url('localities'))?>">Neighbourhoods</a><a href="<?=e(u('methodology.php'))?>">Methodology</a><a href="<?=e(u('search.php'))?>">Search</a>
       </div>
     </header>
-    <div class="rail" aria-label="Explore categories"><div class="rail-inner"><?php foreach($verticals->all() as $v): ?><a style="--accent:<?=e($v['accent'])?>" href="<?=e(vertical_url($v['slug']))?>"><span><?=Icon::svg($v['icon'])?></span><small><?=e($v['name'])?></small></a><?php endforeach; ?></div></div>
+    <div class="rail" aria-label="Explore categories"><div class="rail-inner"><?php foreach($verticals->all() as $v):$isActive=$activeVertical===$v['slug']; ?><a class="<?=$isActive?'is-active':''?>" <?=$isActive?'aria-current="page"':''?> style="--accent:<?=e($v['accent'])?>" href="<?=e(vertical_url($v['slug']))?>"><span><?=Icon::svg($v['icon'])?></span><small><?=e($v['name'])?></small></a><?php endforeach; ?></div></div>
     <?php
 }
 function page_footer(): void {
