@@ -6,7 +6,8 @@ $q=trim((string)($_GET['q']??''));
 $filter=trim((string)($_GET['vertical']??''));
 $citySlug=current_city_slug();
 $areaSlug=current_area_slug();
-$city=$cities->find($citySlug)??$cities->default();
+$city=$cities->find($citySlug);
+if(!$city||empty($city['active'])){http_response_code(404);page_header('City not available');echo '<main id="content" class="shell section"><h1>City not available</h1></main>';page_footer();exit;}
 $cityAreas=areas_for_city($citySlug);
 $results=$search->search(published_entities($citySlug,$areaSlug),$verticals->all(),$q,$filter?:null);
 page_header($q?'Search: '.$q:'Explore ExCompass');
