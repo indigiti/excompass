@@ -50,4 +50,68 @@ document.addEventListener('DOMContentLoaded', () => {
   const syncHeader = () => header?.classList.toggle('is-scrolled', window.scrollY > 18);
   syncHeader();
   window.addEventListener('scroll', syncHeader, { passive: true });
+
+  const galleryMain = document.querySelector('[data-gallery-main]');
+  const galleryCount = document.querySelector('[data-gallery-count]');
+  document.querySelectorAll('[data-gallery-thumb]').forEach((button) => {
+    button.addEventListener('click', () => {
+      if (!galleryMain) return;
+      ['skin-1','skin-2','skin-3','skin-4'].forEach((skin) => galleryMain.classList.remove(skin));
+      galleryMain.classList.add(button.dataset.galleryThumb || 'skin-1');
+      if (galleryCount) galleryCount.textContent = button.dataset.index || '1';
+      document.querySelectorAll('[data-gallery-thumb]').forEach((item) => item.classList.remove('active'));
+      button.classList.add('active');
+    });
+  });
+
+  const modal = document.querySelector('[data-lead-modal]');
+  const openModal = (button) => {
+    if (!modal) return;
+    modal.querySelector('[data-lead-vertical]').value = button.dataset.vertical || '';
+    modal.querySelector('[data-lead-entity]').value = button.dataset.entity || '';
+    modal.querySelector('[data-lead-type]').value = button.dataset.type || 'enquiry';
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    modal.querySelector('input[name="name"]')?.focus();
+  };
+  document.querySelectorAll('[data-open-lead]').forEach((button) => button.addEventListener('click', () => openModal(button)));
+  document.querySelector('[data-close-modal]')?.addEventListener('click', () => {
+    modal?.classList.remove('is-open');
+    modal?.setAttribute('aria-hidden', 'true');
+  });
+  modal?.addEventListener('click', (event) => {
+    if (event.target === modal) {
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  const dock = document.querySelector('[data-compare-dock]');
+  const compareBoxes = [...document.querySelectorAll('[data-compare]')];
+  const syncCompare = () => {
+    const checked = compareBoxes.filter((box) => box.checked);
+    if (checked.length > 3) {
+      checked[checked.length - 1].checked = false;
+      return syncCompare();
+    }
+    if (!dock) return;
+    dock.querySelector('[data-compare-count]').textContent = String(checked.length);
+    dock.querySelector('[data-compare-names]').textContent = checked.length
+      ? checked.map((box) => box.dataset.name).join(' · ')
+      : 'Choose up to three profiles';
+    dock.classList.toggle('is-open', checked.length > 0);
+    dock.setAttribute('aria-hidden', checked.length > 0 ? 'false' : 'true');
+  };
+  compareBoxes.forEach((box) => box.addEventListener('change', syncCompare));
+  dock?.querySelector('[data-clear-compare]')?.addEventListener('click', () => {
+    compareBoxes.forEach((box) => { box.checked = false; });
+    syncCompare();
+  });
+  dock?.querySelector('[data-go-compare]')?.addEventListener('click', () => {
+    const selected = compareBoxes.filter((box) => box.checked).map((box) => box.dataset.slug);
+    if (selected.length < 2) return;
+    const vertical = dock.dataset.vertical || '';
+    const base = window.location.pathname.includes('/excompass/') ? '/excompass/' : '/';
+    window.location.href = base + 'compare.php?vertical=' + encodeURIComponent(vertical) + '&items=' + encodeURIComponent(selected.join(','));
+  });
 });
