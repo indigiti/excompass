@@ -83,6 +83,7 @@ page_header('Pune, edited for better decisions');
     <div class="selection-grid">
       <?php foreach($featured as $item):$v=$item['vertical'];$x=$item['entity']; ?>
       <a class="selection-card" data-tilt style="--accent:<?=e($v['accent'])?>" href="<?=e(entity_url($x['vertical'],$x['slug']))?>">
+        <?php if($x['hero_image_url']):?><img class="remote-cover selection-photo" data-remote-image src="<?=e($x['hero_image_url'])?>" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"><?php endif;?>
         <div class="selection-meta"><span><i></i><?=e($v['name'])?></span><span>#1 current</span></div>
         <div class="selection-score"><strong><?=e((string)$x['score'])?></strong><span>/100</span></div>
         <div class="selection-copy"><h3><?=e($x['name'])?></h3><p><?=e($x['location'])?> · <?=e($x['highlight'])?></p></div>
