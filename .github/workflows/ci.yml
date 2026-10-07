@@ -23,3 +23,5 @@ jobs:
         run: find . -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Smoke checks
         run: php tests/smoke.php
+      - name: Scoring checks
+        run: php tests/scoring.php
