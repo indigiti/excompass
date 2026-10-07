@@ -51,17 +51,38 @@ jobs:
             cat "$RUNNER_TEMP/excompass-http.log"
             exit 1
           fi
-          curl -fsS http://127.0.0.1:8097/ -o "$RUNNER_TEMP/home.html"
-          curl -fsS "http://127.0.0.1:8097/rankings.php?vertical=real-estate" -o "$RUNNER_TEMP/ranking.html"
-          curl -fsS "http://127.0.0.1:8097/search.php?q=Baner" -o "$RUNNER_TEMP/search.html"
-          curl -fsS "http://127.0.0.1:8097/entity.php?vertical=real-estate&slug=godrej-emerald-waters" -o "$RUNNER_TEMP/entity.html"
-          curl -fsS http://127.0.0.1:8097/methodology.php -o "$RUNNER_TEMP/methodology.html"
-          grep -q "Pune," "$RUNNER_TEMP/home.html"
-          grep -q "25" "$RUNNER_TEMP/ranking.html"
-          grep -q "Baner" "$RUNNER_TEMP/search.html"
-          grep -q "Godrej Emerald Waters" "$RUNNER_TEMP/entity.html"
-          grep -q "ranking should explain itself" "$RUNNER_TEMP/methodology.html"
-          grep -q '"ok":true' "$RUNNER_TEMP/health.json"
+
+          fetch_page() {
+            local url="$1"
+            local file="$2"
+            curl -fsS "$url" -o "$file" || { cat "$RUNNER_TEMP/excompass-http.log"; exit 1; }
+          }
+          assert_contains() {
+            local file="$1"
+            local needle="$2"
+            local label="$3"
+            if ! grep -Fq "$needle" "$file"; then
+              echo "HTTP_ASSERTION_FAILED: $label"
+              echo "Expected: $needle"
+              head -c 2500 "$file" || true
+              echo
+              exit 1
+            fi
+            echo "PASS  $label"
+          }
+
+          fetch_page "http://127.0.0.1:8097/" "$RUNNER_TEMP/home.html"
+          fetch_page "http://127.0.0.1:8097/rankings.php?vertical=real-estate" "$RUNNER_TEMP/ranking.html"
+          fetch_page "http://127.0.0.1:8097/search.php?q=Baner" "$RUNNER_TEMP/search.html"
+          fetch_page "http://127.0.0.1:8097/entity.php?vertical=real-estate&slug=godrej-emerald-waters" "$RUNNER_TEMP/entity.html"
+          fetch_page "http://127.0.0.1:8097/methodology.php" "$RUNNER_TEMP/methodology.html"
+
+          assert_contains "$RUNNER_TEMP/home.html" "Pune," "homepage renders"
+          assert_contains "$RUNNER_TEMP/ranking.html" "25" "real estate ranking renders 25 profiles"
+          assert_contains "$RUNNER_TEMP/search.html" "Baner" "search renders Baner matches"
+          assert_contains "$RUNNER_TEMP/entity.html" "Godrej Emerald Waters" "entity profile renders"
+          assert_contains "$RUNNER_TEMP/methodology.html" "ranking should explain itself" "methodology renders"
+          assert_contains "$RUNNER_TEMP/health.json" '"ok":true' "health endpoint renders"
 
   release:
     runs-on: ubuntu-latest
