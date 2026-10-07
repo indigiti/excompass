@@ -2,10 +2,12 @@
 declare(strict_types=1);
 require __DIR__.'/runtime.php';
 
+$city=current_city();
+$citySlug=(string)$city['slug'];
 $all=$verticals->all();
 $tops=[];
 foreach($all as $v){
-    $r=$ranking->rank(published_for_vertical($v['slug']));
+    $r=$ranking->rank(published_for_vertical($v['slug'],$citySlug));
     if($r){$tops[$v['slug']]=$r[0];}
 }
 $featuredSlugs=['real-estate','hospitals','schools','restaurants','hotels','localities'];
@@ -13,21 +15,21 @@ $featured=[];
 foreach($featuredSlugs as $slug){
     if(isset($tops[$slug])){$featured[]=['vertical'=>$verticals->find($slug),'entity'=>$tops[$slug]];}
 }
-$localities=$ranking->rank(published_for_vertical('localities'));
-page_header('Pune, edited for better decisions');
+$localities=$ranking->rank(published_for_vertical('localities',$citySlug));
+page_header($city['name'].', edited for better decisions');
 ?>
 <main id="content">
 <section class="hero-premium">
   <div class="shell hero-layout">
     <div class="hero-copy-block" data-reveal>
       <span class="kicker">Independent city intelligence</span>
-      <h1>Pune,<br><em>edited.</em></h1>
+      <h1><?=e((string)$city['name'])?>,<br><em>edited.</em></h1>
       <p class="hero-deck">A sharper way to decide where to live, learn, dine, stay and spend your time. ExCompass turns crowded choices into ranked, explainable shortlists.</p>
       <form class="hero-search" action="<?=e(u('search.php'))?>" method="get" role="search">
         <input name="q" aria-label="Search ExCompass" placeholder="Search a neighbourhood, school, hospital or need">
-        <button>Explore Pune</button>
+        <input type="hidden" name="city" value="<?=e($citySlug)?>"><button>Explore <?=e((string)$city['name'])?></button>
       </form>
-      <div class="hero-trends"><span>Trending now</span><a href="<?=e(vertical_url('real-estate'))?>">Homes in West Pune</a><a href="<?=e(u('search.php?q=Baner'))?>">Baner</a><a href="<?=e(vertical_url('schools'))?>">Schools</a><a href="<?=e(vertical_url('weekend'))?>">Weekend escapes</a></div>
+      <div class="hero-trends"><span>Trending now</span><a href="<?=e(vertical_url('real-estate',$citySlug))?>">Homes in <?=e((string)$city['name'])?></a><a href="<?=e(area_url($citySlug,'baner'))?>">Baner</a><a href="<?=e(vertical_url('schools',$citySlug))?>">Schools</a><a href="<?=e(vertical_url('weekend',$citySlug))?>">Weekend escapes</a></div>
     </div>
     <div class="hero-visual" data-reveal data-tilt>
       <div class="visual-frame">
@@ -39,7 +41,7 @@ page_header('Pune, edited for better decisions');
           </div>
           <div class="visual-ranks">
             <?php foreach(array_slice($featured,1,3) as $item): ?>
-            <a href="<?=e(entity_url($item['entity']['vertical'],$item['entity']['slug']))?>"><b><?=e($item['entity']['name'])?></b><?=e($item['vertical']['name'])?> · <?=e((string)$item['entity']['score'])?></a>
+            <a href="<?=e(entity_url($item['entity']['vertical'],$item['entity']['slug'],$citySlug))?>"><b><?=e($item['entity']['name'])?></b><?=e($item['vertical']['name'])?> · <?=e((string)$item['entity']['score'])?></a>
             <?php endforeach; ?>
           </div>
         </div>
@@ -69,7 +71,7 @@ page_header('Pune, edited for better decisions');
     foreach($intents as $i=>$row):
       [$slug,$label,$copy]=$row;$v=$verticals->find($slug);
     ?>
-    <a class="intent" style="--accent:<?=e($v['accent'])?>" href="<?=e(vertical_url($slug))?>">
+    <a class="intent" style="--accent:<?=e($v['accent'])?>" href="<?=e(vertical_url($slug,$citySlug))?>">
       <div class="intent-top"><span class="icon-tile"><?=icon_svg($v['icon'])?></span><span class="intent-number">0<?=$i+1?></span></div>
       <div><b><?=e($label)?></b><small><?=e($copy)?></small></div><span class="intent-arrow">→</span>
     </a>
@@ -82,7 +84,7 @@ page_header('Pune, edited for better decisions');
     <div class="section-head"><div><span class="eyebrow">Editor’s selection</span><h2>Six places to start.</h2></div><p>Our current working #1s across high-intent categories. Open the profile to see why each one leads its shortlist.</p></div>
     <div class="selection-grid">
       <?php foreach($featured as $item):$v=$item['vertical'];$x=$item['entity']; ?>
-      <a class="selection-card" data-tilt style="--accent:<?=e($v['accent'])?>" href="<?=e(entity_url($x['vertical'],$x['slug']))?>">
+      <a class="selection-card" data-tilt style="--accent:<?=e($v['accent'])?>" href="<?=e(entity_url($x['vertical'],$x['slug'],$citySlug))?>">
         <?php if($x['hero_image_url']):?><img class="remote-cover selection-photo" data-remote-image src="<?=e($x['hero_image_url'])?>" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"><?php endif;?>
         <div class="selection-meta"><span><i></i><?=e($v['name'])?></span><span>#1 current</span></div>
         <div class="selection-score"><strong><?=e((string)$x['score'])?></strong><span>/100</span></div>
@@ -98,7 +100,7 @@ page_header('Pune, edited for better decisions');
   <div class="section-head"><div><span class="eyebrow">The city, organised</span><h2>Explore all 17 verticals.</h2></div><p>Each category carries its own ranking context, score language and shortlist.</p></div>
   <div class="vertical-grid">
     <?php foreach($all as $v):$x=$tops[$v['slug']]??null; ?>
-    <a class="vertical-card" style="--accent:<?=e($v['accent'])?>" href="<?=e(vertical_url($v['slug']))?>">
+    <a class="vertical-card" style="--accent:<?=e($v['accent'])?>" href="<?=e(vertical_url($v['slug'],$citySlug))?>">
       <span class="icon-tile"><?=icon_svg($v['icon'])?></span>
       <div><b><?=e($v['name'])?></b><small><?=e($v['prompt'])?></small><?php if($x):?><em>Leading now · <?=e($x['name'])?></em><?php endif;?></div><i>→</i>
     </a>
@@ -108,10 +110,10 @@ page_header('Pune, edited for better decisions');
 
 <section class="section section-dark">
   <div class="shell neighbourhood-feature" data-reveal>
-    <div class="neighbourhood-copy"><span class="eyebrow">Neighbourhood intelligence</span><h2>A city is really a collection of daily decisions.</h2><p>Where you live changes commute, schools, healthcare, food, work and weekend rhythm. ExCompass connects those signals into locality-level context instead of treating every category in isolation.</p><a class="text-link" href="<?=e(vertical_url('localities'))?>">Explore neighbourhoods <span>→</span></a></div>
+    <div class="neighbourhood-copy"><span class="eyebrow">Neighbourhood intelligence</span><h2>A city is really a collection of daily decisions.</h2><p>Where you live changes commute, schools, healthcare, food, work and weekend rhythm. ExCompass connects those signals into locality-level context instead of treating every category in isolation.</p><a class="text-link" href="<?=e(vertical_url('localities',$citySlug))?>">Explore neighbourhoods <span>→</span></a></div>
     <div class="locality-stack">
       <?php foreach(array_slice($localities,0,5) as $x): ?>
-      <a class="locality-row" href="<?=e(entity_url('localities',$x['slug']))?>"><strong><?=e((string)$x['score'])?></strong><div><b><?=e($x['name'])?></b><small><?=e($x['highlight'])?></small></div><i>→</i></a>
+      <a class="locality-row" href="<?=e(entity_url('localities',$x['slug'],$citySlug))?>"><strong><?=e((string)$x['score'])?></strong><div><b><?=e($x['name'])?></b><small><?=e($x['highlight'])?></small></div><i>→</i></a>
       <?php endforeach; ?>
     </div>
   </div>
