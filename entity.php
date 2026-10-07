@@ -11,6 +11,7 @@ $detail=vertical_detail($vs);
 $list=$ranking->rank(published_for_vertical($vs));
 $rank=1;foreach($list as $item)if($item['slug']===$slug)$rank=$item['rank'];
 $news=related_demo_news($vs,$x['locality']);
+$gallery=array_values(array_filter((array)($x['gallery_image_urls']??[])));
 page_header($x['name']);
 ?>
 <main id="content" class="shell rich-profile">
@@ -18,9 +19,10 @@ page_header($x['name']);
 
   <section class="profile-showcase" data-reveal>
     <div class="media-gallery">
-      <div class="entity-media-main skin-1" data-gallery-main><span><?=e(strtoupper($v['name']))?> · EXCOMPASS INDEX</span><strong><?=e($x['name'])?></strong><small><?=e($x['locality'])?> · working visual</small></div>
-      <div class="gallery-counter"><b data-gallery-count>1</b> / 4</div>
-      <div class="gallery-thumbs"><?php for($i=1;$i<=4;$i++):?><button class="visual-thumb skin-<?=$i?> <?=$i===1?'active':''?>" data-gallery-thumb="skin-<?=$i?>" data-index="<?=$i?>" aria-label="Show visual <?=$i?>"><span><?=$i?></span></button><?php endfor;?></div>
+      <div class="entity-media-main skin-1" data-gallery-main><?php if($x['hero_image_url']):?><img class="remote-cover" data-gallery-image data-remote-image src="<?=e($x['hero_image_url'])?>" alt="<?=e($x['image_alt'])?>" decoding="async" fetchpriority="high" referrerpolicy="no-referrer"><?php endif;?><span><?=e(strtoupper($v['name']))?> · EXCOMPASS INDEX</span><strong><?=e($x['name'])?></strong><small><?=e($x['locality'])?> · <?=e($x['image_verified']?'verified media':'representative demo media')?></small></div>
+      <div class="gallery-counter"><b data-gallery-count>1</b> / <?=max(1,count($gallery))?></div>
+      <div class="gallery-thumbs"><?php foreach($gallery as $i=>$url):?><button class="visual-thumb skin-<?=($i%4)+1?> <?=$i===0?'active':''?>" data-gallery-thumb data-image-url="<?=e($url)?>" data-index="<?=$i+1?>" aria-label="Show visual <?=$i+1?>"><img data-remote-image src="<?=e($url)?>" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"></button><?php endforeach;?></div>
+      <div class="media-source-line"><span><?=e($x['image_disclaimer'])?></span><?php if($x['image_source_url']):?><a href="<?=e($x['image_source_url'])?>" target="_blank" rel="noopener noreferrer">Source: <?=e($x['image_source_name'])?> ↗</a><?php endif;?></div>
     </div>
     <div class="profile-summary">
       <div class="profile-labels"><?php if($x['editorial_status']==='featured'):?><span class="featured-pill">Featured · visibility only</span><?php else:?><span class="ranking-pill">Independent ranking</span><?php endif;?><span>Demo working profile</span></div>
