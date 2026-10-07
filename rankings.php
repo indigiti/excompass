@@ -67,7 +67,7 @@ page_header($detail['headline']);
       <?php foreach($list as $x): ?>
       <article class="rank-row-rich <?=$x['rank']===1?'is-leader':''?>" style="--accent:<?=e($v['accent'])?>">
         <span class="rank-number"><small>Rank</small>#<?=e((string)$x['rank'])?></span>
-        <a class="rank-visual-mini skin-<?=($x['rank']%4)+1?>" href="<?=e(entity_url($x['vertical'],$x['slug']))?>"><span><?=e(strtoupper($v['name']))?></span><b><?=e($x['name'])?></b></a>
+        <a class="rank-visual-mini skin-<?=($x['rank']%4)+1?>" href="<?=e(entity_url($x['vertical'],$x['slug']))?>"><?php if($x['hero_image_url']):?><img class="remote-cover" data-remote-image src="<?=e($x['hero_image_url'])?>" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"><?php endif;?><span><?=e(strtoupper($v['name']))?></span><b><?=e($x['name'])?></b></a>
         <div class="rank-body">
           <div class="rank-title-line"><a href="<?=e(entity_url($x['vertical'],$x['slug']))?>"><?=e($x['name'])?></a><?php if($x['editorial_status']==='featured'):?><span class="featured-pill">Featured · rank unaffected</span><?php endif;?></div>
           <small><?=e($x['locality'])?> · <?=e($x['primary'])?> · <?=e($x['secondary'])?></small>
@@ -82,7 +82,7 @@ page_header($detail['headline']);
     <aside class="ranking-insight" data-reveal>
       <?php if($featured): ?>
       <section class="insight-card feature">
-        <div class="insight-visual skin-1"><span>#<?=e((string)$featured['rank'])?> <?=e($detail['singular'])?></span><b><?=e($featured['name'])?></b></div>
+        <div class="insight-visual skin-1"><?php if($featured['hero_image_url']):?><img class="remote-cover" data-remote-image src="<?=e($featured['hero_image_url'])?>" alt="<?=e($featured['image_alt'])?>" loading="lazy" decoding="async" referrerpolicy="no-referrer"><?php endif;?><span>#<?=e((string)$featured['rank'])?> <?=e($detail['singular'])?></span><b><?=e($featured['name'])?></b></div>
         <div class="insight-content"><div class="insight-score"><div><span class="eyebrow">Spotlight</span><h3><?=e($featured['name'])?></h3><p><?=e($featured['locality'])?></p></div><strong><?=e((string)$featured['score'])?></strong></div><p><?=e($featured['observation'])?></p><div class="insight-actions"><a class="premium-btn primary" href="<?=e(entity_url($slug,$featured['slug']))?>">Full profile</a><button class="premium-btn ghost" data-open-lead data-vertical="<?=e($slug)?>" data-entity="<?=e($featured['slug'])?>" data-type="enquiry">Request info</button></div></div>
       </section>
       <section class="insight-card"><span class="eyebrow">Score framework</span><h3>What drives the score</h3><div class="mini-score-list"><?php foreach(array_slice($featured['breakdown'],0,5) as $row):$pct=(int)round(100*$row['score']/$row['max']);?><div><span><?=e($row['label'])?></span><i><b style="width:<?=$pct?>%"></b></i></div><?php endforeach;?></div><a class="text-link dark" href="<?=e(u('methodology.php'))?>">Full methodology →</a></section>
