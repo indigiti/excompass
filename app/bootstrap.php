@@ -6,6 +6,8 @@ require_once __DIR__.'/Support/Csrf.php';
 require_once __DIR__.'/Domain/Catalog/EntityRepositoryInterface.php';
 require_once __DIR__.'/Domain/Catalog/MutableEntityRepositoryInterface.php';
 require_once __DIR__.'/Domain/Catalog/VerticalRepository.php';
+require_once __DIR__.'/Domain/Geo/CityRepository.php';
+require_once __DIR__.'/Domain/Geo/AreaDirectory.php';
 require_once __DIR__.'/Domain/Media/RemoteImagePolicy.php';
 require_once __DIR__.'/Domain/Catalog/RemoteMediaCatalog.php';
 require_once __DIR__.'/Domain/Catalog/VerticalDetailRepository.php';
@@ -25,6 +27,8 @@ use ExCompass\Domain\Catalog\VerticalRepository;
 use ExCompass\Domain\Ranking\RankingService;
 use ExCompass\Domain\Search\SearchService;
 use ExCompass\Domain\Media\RemoteImagePolicy;
+use ExCompass\Domain\Geo\CityRepository;
+use ExCompass\Domain\Geo\AreaDirectory;
 use ExCompass\Infrastructure\Storage\JsonEntityRepository;
 use ExCompass\Infrastructure\Storage\JsonStore;
 use ExCompass\Support\Csrf;
@@ -50,13 +54,16 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 
 $verticals=new VerticalRepository();
+$cities=new CityRepository();
+$areas=new AreaDirectory();
+$defaultCity=$cities->default();
 $verticalDetails=new VerticalDetailRepository();
 $remoteImages=new RemoteImagePolicy();
 $remoteMedia=new RemoteMediaCatalog($remoteImages);
 $profiles=new EntityProfileService($verticalDetails,$remoteMedia);
 $store=new JsonStore((string)$storageConfig['path']);
 $seedEntities=new EntityRepository();
-$entities=new JsonEntityRepository($store,$seedEntities);
+$entities=new JsonEntityRepository($store,$seedEntities,(string)$defaultCity['slug'],(string)$defaultCity['name']);
 $ranking=new RankingService();
 $search=new SearchService();
 
@@ -66,8 +73,40 @@ function u(string $path=''): string {
     $base=$config['base_path']?:'';
     return $base.'/'.ltrim($path,'/');
 }
-function vertical_url(string $slug): string { return u(rawurlencode($slug).'/'); }
-function entity_url(string $vertical,string $slug): string { return u(rawurlencode($vertical).'/'.rawurlencode($slug).'/'); }
+function current_city_slug(): string {
+    global $cities;
+    $candidate=strtolower(trim((string)($_GET['city']??'')));
+    $city=$candidate!==''?$cities->find($candidate):null;
+    if($city && !empty($city['active'])) return (string)$city['slug'];
+    return (string)$cities->default()['slug'];
+}
+function current_city(): array {
+    global $cities;
+    return $cities->find(current_city_slug()) ?? $cities->default();
+}
+function current_area_slug(): ?string {
+    $area=strtolower(trim((string)($_GET['area']??'')));
+    return $area!==''?$area:null;
+}
+function city_url(string $citySlug): string {
+    return u('city/'.rawurlencode($citySlug).'/');
+}
+function area_url(string $citySlug,string $areaSlug,?string $vertical=null): string {
+    $path='city/'.rawurlencode($citySlug).'/area/'.rawurlencode($areaSlug).'/';
+    if($vertical!==null&&$vertical!=='') $path.=rawurlencode($vertical).'/';
+    return u($path);
+}
+function vertical_url(string $slug,?string $citySlug=null,?string $areaSlug=null): string {
+    if($citySlug!==null&&$citySlug!==''){
+        if($areaSlug!==null&&$areaSlug!=='') return area_url($citySlug,$areaSlug,$slug);
+        return u('city/'.rawurlencode($citySlug).'/'.rawurlencode($slug).'/');
+    }
+    return u(rawurlencode($slug).'/');
+}
+function entity_url(string $vertical,string $slug,?string $citySlug=null): string {
+    if($citySlug!==null&&$citySlug!=='') return u('city/'.rawurlencode($citySlug).'/'.rawurlencode($vertical).'/'.rawurlencode($slug).'/');
+    return u(rawurlencode($vertical).'/'.rawurlencode($slug).'/');
+}
 function icon_svg(string $key): string { return Icon::svg($key); }
 function vertical_detail(string $slug): array { global $verticalDetails; return $verticalDetails->find($slug); }
 function csrf_token(): string { return Csrf::token(); }
@@ -77,26 +116,36 @@ function enrich_entities(array $items): array {
     $counts=[];
     $out=[];
     foreach($items as $entity){
-        $vertical=(string)($entity['vertical']??'');
-        $index=$counts[$vertical]??0;
+        $key=(string)($entity['city_slug']??'pune').'|'.(string)($entity['vertical']??'');
+        $index=$counts[$key]??0;
         $out[]=$profiles->enrich($entity,$index);
-        $counts[$vertical]=$index+1;
+        $counts[$key]=$index+1;
     }
     return $out;
 }
-function published_entities(): array {
+function published_entities(?string $citySlug=null,?string $areaSlug=null): array {
     global $entities;
-    $items=array_values(array_filter($entities->all(), static fn(array $entity): bool => ($entity['status'] ?? 'published') === 'published'));
+    $citySlug=$citySlug??current_city_slug();
+    $items=array_values(array_filter($entities->all(), static function(array $entity)use($citySlug,$areaSlug):bool{
+        if(($entity['status']??'published')!=='published') return false;
+        if(($entity['city_slug']??'pune')!==$citySlug) return false;
+        if($areaSlug!==null&&$areaSlug!==''&&($entity['area_slug']??'')!==$areaSlug) return false;
+        return true;
+    }));
     return enrich_entities($items);
 }
-function published_for_vertical(string $vertical): array {
-    return array_values(array_filter(published_entities(), static fn(array $entity): bool => $entity['vertical'] === $vertical));
+function published_for_vertical(string $vertical,?string $citySlug=null,?string $areaSlug=null): array {
+    return array_values(array_filter(published_entities($citySlug,$areaSlug), static fn(array $entity): bool => $entity['vertical'] === $vertical));
 }
-function find_published_entity(string $vertical,string $slug): ?array {
-    foreach(published_entities() as $entity) {
+function find_published_entity(string $vertical,string $slug,?string $citySlug=null): ?array {
+    foreach(published_entities($citySlug) as $entity) {
         if($entity['vertical']===$vertical && $entity['slug']===$slug) return $entity;
     }
     return null;
+}
+function areas_for_city(?string $citySlug=null): array {
+    global $areas,$entities;
+    return $areas->fromEntities($entities->all(),$citySlug??current_city_slug());
 }
 function related_demo_news(string $vertical,string $locality,int $limit=4): array {
     $news=[
@@ -126,7 +175,7 @@ function safe_return_path(?string $path): string {
 }
 
 function page_header(string $title): void {
-    global $config,$verticals;
+    global $config,$verticals,$cities;
     $activeVertical=trim((string)($_GET['vertical']??''));
     if(!$verticals->find($activeVertical)){
         $activeVertical='';
@@ -138,18 +187,21 @@ function page_header(string $title): void {
             }
         }
     }
-    ?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b0d"><meta name="color-scheme" content="light"><title><?=e($title)?> · <?=e($config['name'])?></title><meta name="description" content="Independent rankings, comparisons and local intelligence for <?=e($config['city'])?>."><link rel="stylesheet" href="<?=e(u('assets/css/app.css?v=20261007-header-2'))?>"></head><body>
+    $city=current_city();
+    ?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b0d"><meta name="color-scheme" content="light"><title><?=e($title)?> · <?=e($config['name'])?></title><meta name="description" content="Independent rankings, comparisons and local intelligence for <?=e($config['city'])?>."><link rel="stylesheet" href="<?=e(u('assets/css/app.css?v=20261007-geo-1'))?>"></head><body>
     <a class="skip-link" href="#content">Skip to content</a>
     <header class="site-header" data-header>
       <div class="shell nav">
         <a class="brand" href="<?=e(u())?>" aria-label="ExCompass home"><span class="brand-mark">Ex</span><span>Compass</span></a>
+        <a class="city-chip" href="<?=e(city_url((string)$city['slug']))?>" aria-label="Current city <?=e((string)$city['name'])?>"><span>⌖</span><b><?=e((string)$city['name'])?></b><?php if(count($cities->active())>1):?><i>⌄</i><?php endif;?></a>
         <nav class="primary-nav" aria-label="Primary navigation">
           <a href="<?=e(u())?>">Discover</a>
           <a href="<?=e(vertical_url('localities'))?>">Neighbourhoods</a>
           <a href="<?=e(u('methodology.php'))?>">Methodology</a>
         </nav>
         <form class="nav-search" action="<?=e(u('search.php'))?>" method="get" role="search">
-          <span aria-hidden="true">⌕</span><input name="q" aria-label="Search ExCompass" placeholder="Search Pune"><button>Search</button>
+          <input type="hidden" name="city" value="<?=e((string)$city['slug'])?>">
+          <span aria-hidden="true">⌕</span><input name="q" aria-label="Search ExCompass" placeholder="Search <?=e((string)$city['name'])?>"><button>Search</button>
         </form>
         <a class="nav-cta" href="<?=e(u('search.php'))?>">Explore</a>
         <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" data-nav-toggle>☰</button>
@@ -163,6 +215,7 @@ function page_header(string $title): void {
 }
 function page_footer(): void {
     global $config;
+    $city=current_city();
     ?><aside class="lead-modal" data-lead-modal aria-hidden="true">
       <div class="lead-dialog" role="dialog" aria-modal="true" aria-labelledby="lead-title">
         <button data-close-modal class="modal-close" type="button" aria-label="Close">×</button>
@@ -186,7 +239,7 @@ function page_footer(): void {
       <div><b class="brand"><span class="brand-mark">Ex</span><span>Compass</span></b><p>Independent signals for better local decisions.</p></div>
       <div><small>EDITORIAL PRINCIPLE</small><p>Rankings and commercial presentation remain structurally separate.</p></div>
       <div><small>WORKING DATA</small><p>Current catalog entries and scores are demonstration data for product development.</p></div>
-      <div><small>LOCATION</small><p><?=e($config['city'])?> · India</p></div>
+      <div><small>LOCATION</small><p><?=e((string)$city['name'])?> · <?=e((string)$city['state'])?></p></div>
     </div><div class="shell footer-bottom"><span>© <?=date('Y')?> ExCompass</span><a href="<?=e(u('methodology.php'))?>">How rankings work</a><a href="<?=e(u('health.php'))?>">System status</a></div></footer>
     <script src="<?=e(u('assets/js/app.js?v=20261007-remote-media-1'))?>" defer></script></body></html><?php
 }
