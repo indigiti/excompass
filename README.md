@@ -25,8 +25,11 @@ The public experience is built as a premium editorial discovery product rather t
 - external HTTPS photography with no image files copied into ExCompass
 - image-host allowlist, source/credit metadata, verification flag and automatic visual fallback
 - compact premium header with responsive navigation and active category rail state
+- city registry and city-scoped entity identity
+- city → area/locality → vertical drilldown
+- Pune-only active dataset today, with future cities isolated by composite geography keys
 
-The development seed catalog contains exactly **105 published demo profiles** so the whole product can be tested without manual setup:
+The development seed catalog currently contains exactly **105 published demo profiles, all scoped to Pune** so the whole product can be tested without manual setup:
 
 - Real Estate: 25
 - Other 16 verticals: 5 each
@@ -60,7 +63,7 @@ Every successful push to main produces the artifact named digiops-release.
 Release contract:
 
 - schema: DIGIOPS-RELEASE/1
-- version: 1.3.1
+- version: 1.4.0
 - browser route: /excompass/
 - public target: public_html/excompass/
 - private target: private_html/excompass/
@@ -77,4 +80,4 @@ Then open /excompass/admin/.
 
 ## Quality gates
 
-CI validates PHP syntax, 105-record seed integrity, rich profile and remote-media metadata, HTTPS/host safety, scoring, JSON persistence, RBAC workflow, homepage/ranking/profile/compare/report HTTP rendering and the exact DigiOps release payload.
+CI validates PHP syntax, Pune-only city registry integrity, city/area normalization, 105-record seed integrity, rich profile and remote-media metadata, HTTPS/host safety, scoring, JSON persistence, RBAC workflow, city/area/ranking/profile/compare/report HTTP rendering and the exact DigiOps release payload.
