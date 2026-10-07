@@ -1,0 +1,9 @@
+Options -Indexes
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+RewriteRule ^search/?$ search.php [L,QSA]
+RewriteRule ^methodology/?$ methodology.php [L,QSA]
+RewriteRule ^([^/]+)/([^/]+)/?$ entity.php?vertical=$1&slug=$2 [L,QSA]
+RewriteRule ^([^/]+)/?$ rankings.php?vertical=$1 [L,QSA]
