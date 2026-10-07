@@ -8,5 +8,14 @@ RewriteRule ^ - [L]
 
 RewriteRule ^search/?$ search.php [L,QSA]
 RewriteRule ^methodology/?$ methodology.php [L,QSA]
+
+# Future-ready city / area hierarchy. Pune is currently the only active city.
+RewriteRule ^city/([^/]+)/area/([^/]+)/([^/]+)/?$ rankings.php?city=$1&area=$2&vertical=$3 [L,QSA]
+RewriteRule ^city/([^/]+)/area/([^/]+)/?$ area.php?city=$1&area=$2 [L,QSA]
+RewriteRule ^city/([^/]+)/([^/]+)/([^/]+)/?$ entity.php?city=$1&vertical=$2&slug=$3 [L,QSA]
+RewriteRule ^city/([^/]+)/([^/]+)/?$ rankings.php?city=$1&vertical=$2 [L,QSA]
+RewriteRule ^city/([^/]+)/?$ city.php?city=$1 [L,QSA]
+
+# Backward-compatible Pune-default routes.
 RewriteRule ^([^/]+)/([^/]+)/?$ entity.php?vertical=$1&slug=$2 [L,QSA]
 RewriteRule ^([^/]+)/?$ rankings.php?vertical=$1 [L,QSA]
