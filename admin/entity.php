@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/_bootstrap.php';
 require __DIR__ . '/_layout.php';
-require_once dirname(__DIR__) . '/app/Infrastructure/Storage/JsonAuditLog.php';
+require_once EXCOMPASS_PRIVATE_ROOT_PATH . '/app/Infrastructure/Storage/JsonAuditLog.php';
 
 use ExCompass\Infrastructure\Storage\JsonAuditLog;
 use ExCompass\Support\Csrf;
