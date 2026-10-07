@@ -36,6 +36,7 @@ admin_header('Enquiries', $user);
   <div class="lead-card-head"><div><span><?=e(strtoupper((string)($row['type']??'enquiry')))?></span><h2><?=e((string)($row['name']??'Unknown'))?></h2></div><time><?=e((string)($row['created_at']??''))?></time></div>
   <dl>
     <div><dt>Contact</dt><dd><?=e((string)($row['contact']??''))?></dd></div>
+    <div><dt>City</dt><dd><?=e((string)($row['city']??'pune'))?></dd></div>
     <div><dt>Vertical</dt><dd><?=e((string)($row['vertical']??''))?></dd></div>
     <div><dt>Entity</dt><dd><?=e((string)($row['entity']??''))?></dd></div>
   </dl>
