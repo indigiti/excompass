@@ -10,7 +10,7 @@ final class SearchService {
         $out=array_filter($entities,function(array $e)use($query,$vertical,$names):bool{
             if($vertical&&$e['vertical']!==$vertical) return false;
             if($query==='') return true;
-            $hay=implode(' ',[$e['name'],$e['location'],$e['highlight'],$names[$e['vertical']]??'',implode(' ',$e['tags'])]);
+            $hay=implode(' ',[$e['name'],$e['location'],$e['area_name']??'',$e['city_name']??'',$e['highlight'],$names[$e['vertical']]??'',implode(' ',$e['tags'])]);
             return str_contains(mb_strtolower($hay),$query);
         });
         usort($out,fn(array $a,array $b):int=>$b['score']<=>$a['score']);
