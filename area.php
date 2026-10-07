@@ -5,7 +5,7 @@ require __DIR__.'/runtime.php';
 $citySlug=current_city_slug();
 $areaSlug=current_area_slug()??'';
 $city=$cities->find($citySlug);
-$area=$areas->find($entities->all(),$citySlug,$areaSlug);
+$area=$areas->find(published_entities($citySlug),$citySlug,$areaSlug);
 if(!$city||!$area){http_response_code(404);page_header('Area not found');echo '<main id="content" class="shell section"><h1>Area not found</h1></main>';page_footer();exit;}
 
 $items=published_entities($citySlug,$areaSlug);
