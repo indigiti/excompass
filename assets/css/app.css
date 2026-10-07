@@ -915,3 +915,17 @@ input,select,textarea,button{color-scheme:light}
     font-size:7px;
   }
 }
+
+.rail-inner>a.is-active{
+  background:rgba(255,255,255,.88);
+}
+.rail-inner>a.is-active:after{
+  transform:scaleX(1);
+}
+.rail-inner>a.is-active span{
+  background:color-mix(in srgb,var(--accent) 15%,white);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent),0 6px 18px color-mix(in srgb,var(--accent) 12%,transparent);
+}
+.rail-inner>a.is-active small{
+  color:#11151a;
+}
