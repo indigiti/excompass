@@ -55,6 +55,8 @@ jobs:
           fetch_page "http://127.0.0.1:8097/compare.php?city=pune&vertical=real-estate&items=godrej-emerald-waters,lodha-panache" "$RUNNER_TEMP/compare.html"
           fetch_page "http://127.0.0.1:8097/report.php?city=pune&vertical=real-estate" "$RUNNER_TEMP/report.html"
           fetch_page "http://127.0.0.1:8097/methodology.php" "$RUNNER_TEMP/methodology.html"
+          fetch_page "http://127.0.0.1:8097/admin/login.php" "$RUNNER_TEMP/admin-login.html"
+          curl -fsSI "http://127.0.0.1:8097/admin/" -o "$RUNNER_TEMP/admin-index.headers"
 
           assert_contains "$RUNNER_TEMP/home.html" "Pune," "homepage renders"
           assert_contains "$RUNNER_TEMP/ranking.html" "Filter the shortlist" "rich ranking workspace renders"
@@ -73,6 +75,9 @@ jobs:
           assert_contains "$RUNNER_TEMP/compare.html" "Compare Real Estate" "comparison renders"
           assert_contains "$RUNNER_TEMP/report.html" "Ranking Report" "report renders"
           assert_contains "$RUNNER_TEMP/methodology.html" "ranking should explain itself" "methodology renders"
+          assert_contains "$RUNNER_TEMP/admin-login.html" "Admin sign in" "admin login renders"
+          assert_contains "$RUNNER_TEMP/admin-index.headers" "302 Found" "admin index redirects when signed out"
+          assert_contains "$RUNNER_TEMP/admin-index.headers" "Location: /admin/login.php" "admin redirect target is correct"
           assert_contains "$RUNNER_TEMP/health.json" '"ok":true' "health endpoint renders"
 
   release:
@@ -93,6 +98,27 @@ jobs:
         run: php tools/check-release-package.php
       - name: PHP syntax in packaged runtime
         run: find release/public release/private -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: DigiOps split-layout runtime smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          export EXCOMPASS_PRIVATE_ROOT="$PWD/release/private"
+          export EXCOMPASS_STORAGE_PATH="$RUNNER_TEMP/excompass-release-storage"
+          php -S 127.0.0.1:8098 -t release/public > "$RUNNER_TEMP/excompass-release-http.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          READY=0
+          for i in {1..50}; do
+            if curl -fsS http://127.0.0.1:8098/health.php -o "$RUNNER_TEMP/release-health.json"; then READY=1; break; fi
+            sleep 0.2
+          done
+          if [ "$READY" != "1" ]; then cat "$RUNNER_TEMP/excompass-release-http.log"; exit 1; fi
+          curl -fsS http://127.0.0.1:8098/admin/login.php -o "$RUNNER_TEMP/release-admin-login.html"
+          curl -fsSI http://127.0.0.1:8098/admin/ -o "$RUNNER_TEMP/release-admin-index.headers"
+          grep -Fq "Admin sign in" "$RUNNER_TEMP/release-admin-login.html"
+          grep -Fq "302 Found" "$RUNNER_TEMP/release-admin-index.headers"
+          grep -Fq "Location: /excompass/admin/login.php" "$RUNNER_TEMP/release-admin-index.headers"
+          grep -Fq '"ok":true' "$RUNNER_TEMP/release-health.json"
       - name: Upload DigiOps release artifact
         uses: actions/upload-artifact@v4
         with:
