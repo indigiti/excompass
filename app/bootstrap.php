@@ -6,6 +6,8 @@ require_once __DIR__.'/Support/Csrf.php';
 require_once __DIR__.'/Domain/Catalog/EntityRepositoryInterface.php';
 require_once __DIR__.'/Domain/Catalog/MutableEntityRepositoryInterface.php';
 require_once __DIR__.'/Domain/Catalog/VerticalRepository.php';
+require_once __DIR__.'/Domain/Media/RemoteImagePolicy.php';
+require_once __DIR__.'/Domain/Catalog/RemoteMediaCatalog.php';
 require_once __DIR__.'/Domain/Catalog/VerticalDetailRepository.php';
 require_once __DIR__.'/Domain/Catalog/EntityProfileService.php';
 require_once __DIR__.'/Domain/Catalog/DemoEntityCatalog.php';
@@ -17,10 +19,12 @@ require_once __DIR__.'/Infrastructure/Storage/JsonEntityRepository.php';
 
 use ExCompass\Domain\Catalog\EntityProfileService;
 use ExCompass\Domain\Catalog\EntityRepository;
+use ExCompass\Domain\Catalog\RemoteMediaCatalog;
 use ExCompass\Domain\Catalog\VerticalDetailRepository;
 use ExCompass\Domain\Catalog\VerticalRepository;
 use ExCompass\Domain\Ranking\RankingService;
 use ExCompass\Domain\Search\SearchService;
+use ExCompass\Domain\Media\RemoteImagePolicy;
 use ExCompass\Infrastructure\Storage\JsonEntityRepository;
 use ExCompass\Infrastructure\Storage\JsonStore;
 use ExCompass\Support\Csrf;
@@ -47,7 +51,9 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 $verticals=new VerticalRepository();
 $verticalDetails=new VerticalDetailRepository();
-$profiles=new EntityProfileService($verticalDetails);
+$remoteImages=new RemoteImagePolicy();
+$remoteMedia=new RemoteMediaCatalog($remoteImages);
+$profiles=new EntityProfileService($verticalDetails,$remoteMedia);
 $store=new JsonStore((string)$storageConfig['path']);
 $seedEntities=new EntityRepository();
 $entities=new JsonEntityRepository($store,$seedEntities);
@@ -121,7 +127,7 @@ function safe_return_path(?string $path): string {
 
 function page_header(string $title): void {
     global $config,$verticals;
-    ?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b0d"><meta name="color-scheme" content="light"><title><?=e($title)?> · <?=e($config['name'])?></title><meta name="description" content="Independent rankings, comparisons and local intelligence for <?=e($config['city'])?>."><link rel="stylesheet" href="<?=e(u('assets/css/app.css?v=20261007-rich-profile-1'))?>"></head><body>
+    ?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b0d"><meta name="color-scheme" content="light"><title><?=e($title)?> · <?=e($config['name'])?></title><meta name="description" content="Independent rankings, comparisons and local intelligence for <?=e($config['city'])?>."><link rel="stylesheet" href="<?=e(u('assets/css/app.css?v=20261007-remote-media-1'))?>"></head><body>
     <a class="skip-link" href="#content">Skip to content</a>
     <header class="site-header" data-header>
       <div class="shell nav">
@@ -171,5 +177,5 @@ function page_footer(): void {
       <div><small>WORKING DATA</small><p>Current catalog entries and scores are demonstration data for product development.</p></div>
       <div><small>LOCATION</small><p><?=e($config['city'])?> · India</p></div>
     </div><div class="shell footer-bottom"><span>© <?=date('Y')?> ExCompass</span><a href="<?=e(u('methodology.php'))?>">How rankings work</a><a href="<?=e(u('health.php'))?>">System status</a></div></footer>
-    <script src="<?=e(u('assets/js/app.js?v=20261007-rich-profile-1'))?>" defer></script></body></html><?php
+    <script src="<?=e(u('assets/js/app.js?v=20261007-remote-media-1'))?>" defer></script></body></html><?php
 }
