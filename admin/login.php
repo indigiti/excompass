@@ -5,6 +5,10 @@ require __DIR__ . '/_bootstrap.php';
 
 use ExCompass\Support\Csrf;
 
+if (admin_needs_setup()) {
+    admin_redirect('setup.php');
+}
+
 if (admin_user()) {
     admin_redirect('');
 }
@@ -28,4 +32,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin sign in · ExCompass</title><link rel="stylesheet" href="<?=e(u('assets/css/app.css'))?>"><link rel="stylesheet" href="<?=e(u('assets/css/admin.css'))?>"></head><body class="admin-login-body"><form class="admin-login" method="post"><a class="brand" href="<?=e(u())?>"><span>Ex</span>Compass</a><h1>Admin sign in</h1><p>Editorial, ranking and publishing workspace.</p><?php if($error):?><div class="admin-alert error"><?=e($error)?></div><?php endif;?><input type="hidden" name="_token" value="<?=e(Csrf::token())?>"><label>Email<input type="email" name="email" required autocomplete="username"></label><label>Password<input type="password" name="password" required autocomplete="current-password"></label><button type="submit">Sign in</button><small>Create the first admin with <code>bin/create-admin.php</code>.</small></form></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin sign in · ExCompass</title><link rel="stylesheet" href="<?=e(u('assets/css/app.css'))?>"><link rel="stylesheet" href="<?=e(u('assets/css/admin.css'))?>"></head><body class="admin-login-body"><form class="admin-login" method="post"><a class="brand" href="<?=e(u())?>"><span>Ex</span>Compass</a><h1>Admin sign in</h1><p>Editorial, ranking and publishing workspace.</p><?php if($error):?><div class="admin-alert error"><?=e($error)?></div><?php endif;?><input type="hidden" name="_token" value="<?=e(Csrf::token())?>"><label>Email<input type="email" name="email" required autocomplete="username"></label><label>Password<input type="password" name="password" required autocomplete="current-password"></label><button type="submit">Sign in</button><small>Use your administrator account to access the editorial workspace.</small></form></body></html>
