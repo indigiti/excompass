@@ -66,6 +66,8 @@ jobs:
               echo "Expected: $needle"
               head -c 2500 "$file" || true
               echo
+              echo "--- server log ---"
+              cat "$RUNNER_TEMP/excompass-http.log" || true
               exit 1
             fi
             echo "PASS  $label"
@@ -78,7 +80,7 @@ jobs:
           fetch_page "http://127.0.0.1:8097/methodology.php" "$RUNNER_TEMP/methodology.html"
 
           assert_contains "$RUNNER_TEMP/home.html" "Pune," "homepage renders"
-          assert_contains "$RUNNER_TEMP/ranking.html" "25" "real estate ranking renders 25 profiles"
+          assert_contains "$RUNNER_TEMP/ranking.html" "Godrej Emerald Waters" "real estate ranking renders rows"
           assert_contains "$RUNNER_TEMP/search.html" "Baner" "search renders Baner matches"
           assert_contains "$RUNNER_TEMP/entity.html" "Godrej Emerald Waters" "entity profile renders"
           assert_contains "$RUNNER_TEMP/methodology.html" "ranking should explain itself" "methodology renders"
