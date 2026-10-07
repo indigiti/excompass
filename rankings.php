@@ -9,7 +9,7 @@ page_header('Best '.$v['name'].' in '.$config['city']);
 ?>
 <main id="content">
 <section class="page-hero" style="--accent:<?=e($v['accent'])?>"><div class="shell page-hero-inner">
-  <div data-reveal><span class="icon-tile"><?=ExCompassSupportIcon::svg($v['icon'])?></span><span class="eyebrow">ExCompass ranking · <?=e($config['city'])?></span><h1>Best <?=e($v['name'])?></h1><p><?=e($v['prompt'])?>. This working edition uses populated demo data so ranking, profile, search and editorial flows can be tested before production evidence is loaded.</p></div>
+  <div data-reveal><span class="icon-tile"><?=icon_svg($v['icon'])?></span><span class="eyebrow">ExCompass ranking · <?=e($config['city'])?></span><h1>Best <?=e($v['name'])?></h1><p><?=e($v['prompt'])?>. This working edition uses populated demo data so ranking, profile, search and editorial flows can be tested before production evidence is loaded.</p></div>
   <div class="page-stat"><strong><?=count($list)?></strong><span>Profiles in this shortlist</span></div>
 </div></section>
 <section class="shell section" style="padding-top:24px">
