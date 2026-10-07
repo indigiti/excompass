@@ -29,7 +29,7 @@ $remove($out);
 mkdir($public, 0755, true);
 mkdir($private . '/build', 0755, true);
 
-$publicFiles = ['.htaccess','runtime.php','index.php','rankings.php','entity.php','search.php','methodology.php','health.php','compare.php','report.php','brochure.php','badge.php','lead.php'];
+$publicFiles = ['.htaccess','runtime.php','index.php','rankings.php','entity.php','search.php','methodology.php','health.php','compare.php','report.php','brochure.php','badge.php','lead.php','city.php','area.php'];
 $publicDirs = ['assets','admin'];
 $privateDirs = ['app','config','bin','database'];
 
@@ -48,7 +48,7 @@ foreach ($privateDirs as $name) {
 
 $sourceSha = (string) (getenv('GITHUB_SHA') ?: 'local');
 $build = [
-    'schema'=>'DIGIOPS-RELEASE/1','name'=>'ExCompass','version'=>'1.3.1','builtAt'=>date(DATE_ATOM),'sourceSha'=>$sourceSha,
+    'schema'=>'DIGIOPS-RELEASE/1','name'=>'ExCompass','version'=>'1.4.0','builtAt'=>date(DATE_ATOM),'sourceSha'=>$sourceSha,
     'branch'=>(string)(getenv('GITHUB_REF_NAME')?:'local'),'ciRunNumber'=>(string)(getenv('GITHUB_RUN_NUMBER')?:''),
     'ciRunId'=>(string)(getenv('GITHUB_RUN_ID')?:''),'ciRunAttempt'=>(string)(getenv('GITHUB_RUN_ATTEMPT')?:''),
     'public'=>'public','private'=>'private','publicPath'=>'public_html/excompass/','privatePath'=>'private_html/excompass/','persistentPaths'=>['storage/'],
