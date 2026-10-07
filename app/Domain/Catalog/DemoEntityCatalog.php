@@ -9,12 +9,12 @@ final class DemoEntityCatalog
     {
         $groups = [
             'real-estate' => [
-                ['godrej-emerald-waters','Godrej Emerald Waters','Pimpri-Chinchwad',94,'Balanced connectivity, planning and developer track record',['2–4 BHK','RERA','Family']],
-                ['lodha-panache','Lodha Panache','Hinjawadi',93,'Large-format township living close to the west Pune tech corridor',['2–4 BHK','Township','IT corridor']],
-                ['kolte-patil-24k-altura','24K Altura','Baner',92,'Premium residential positioning with strong west Pune access',['Luxury','Baner','Lifestyle']],
-                ['mahindra-happinest-tathawade','Mahindra Happinest','Tathawade',91,'Practical urban homes with improving social infrastructure',['2–3 BHK','Family','Value']],
-                ['vtp-bellissimo','VTP Bellissimo','Hinjawadi',90,'Strong west-Pune location and amenity proposition',['2–3 BHK','IT corridor','Amenities']],
-                ['kumar-prospera','Kumar Prospera','Hadapsar',89,'Established east Pune access with family-oriented planning',['2–3 BHK','Hadapsar','Family']],
+                ['godrej-emerald-waters','Godrej Emerald Waters','Hinjawadi',92,'Strong overall residential proposition balancing access, planning, value and family usability',['2, 3 & 4 BHK','17 Acres','Family']],
+                ['lodha-panache','Lodha Panache','Hinjawadi',91,'Large-format residential proposition close to the west Pune technology corridor',['2 & 3 BHK','12 Acres','End Use']],
+                ['vtp-earth-one','VTP Earth One','Kharadi',90,'Township-scale proposition in an important east Pune growth corridor',['2 & 3 BHK','14 Acres','Investment']],
+                ['kolte-patil-24k-manor','Kolte-Patil 24K Manor','Baner',89,'Premium apartment positioning with established west Pune access',['3 & 4 BHK','8 Acres','End Use']],
+                ['nyati-elysia','Nyati Elysia','Kharadi',88,'Ready residential proposition with strong east Pune connectivity and family appeal',['2 & 3 BHK','9 Acres','Family']],
+                ['majestique-marbella','Majestique Marbella','Kharadi',87,'Apartment proposition positioned around east Pune employment and lifestyle access',['2 & 3 BHK','10 Acres','Investment']],
                 ['purva-atmosphere','Purva Atmosphere','Keshav Nagar',88,'Contemporary planning with access to east Pune employment hubs',['2–3 BHK','East Pune','Modern']],
                 ['gera-world-of-joy','Gera World of Joy','Kharadi',87,'Family-led project concept near major commercial districts',['2–3 BHK','Kharadi','Family']],
                 ['shapoorji-pallonji-joyville','Shapoorji Pallonji Joyville','Hinjawadi',86,'Scale, amenities and tech-corridor connectivity',['2–3 BHK','Township','Amenities']],
