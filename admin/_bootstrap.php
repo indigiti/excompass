@@ -27,9 +27,19 @@ function admin_user(): ?array
     return $auth->user();
 }
 
+function admin_needs_setup(): bool
+{
+    global $userRepository;
+    return !$userRepository->hasAdmin();
+}
+
 function require_admin(string $permission = 'admin.view'): array
 {
     global $access;
+    if (admin_needs_setup()) {
+        header('Location: ' . u('admin/setup.php'));
+        exit;
+    }
     $user = admin_user();
     if (!$user) {
         header('Location: ' . u('admin/login.php'));
