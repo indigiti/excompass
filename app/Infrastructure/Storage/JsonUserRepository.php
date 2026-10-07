@@ -86,6 +86,34 @@ final class JsonUserRepository implements UserRepositoryInterface
         return $saved;
     }
 
+    public function updatePassword(int $userId, string $passwordHash): array
+    {
+        if ($userId <= 0) {
+            throw new InvalidArgumentException('A valid user is required.');
+        }
+        if ($passwordHash === '') {
+            throw new InvalidArgumentException('A password hash is required.');
+        }
+
+        $saved = [];
+        $this->store->update('users.json', function (array $users) use ($userId, $passwordHash, &$saved): array {
+            foreach ($users as $index => $user) {
+                if ((int)($user['id'] ?? 0) !== $userId) {
+                    continue;
+                }
+
+                $user['password_hash'] = $passwordHash;
+                $users[$index] = $user;
+                $saved = $user;
+                return array_values($users);
+            }
+
+            throw new InvalidArgumentException('User not found.');
+        });
+
+        return $saved;
+    }
+
     public function save(array $user): array
     {
         $email = strtolower(trim((string) ($user['email'] ?? '')));
