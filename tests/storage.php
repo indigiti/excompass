@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__).'/app/Domain/Catalog/EntityRepositoryInterface.php';
 require_once dirname(__DIR__).'/app/Domain/Catalog/MutableEntityRepositoryInterface.php';
+require_once dirname(__DIR__).'/app/Domain/Catalog/DemoEntityCatalog.php';
 require_once dirname(__DIR__).'/app/Domain/Catalog/EntityRepository.php';
 require_once dirname(__DIR__).'/app/Domain/Auth/UserRepositoryInterface.php';
 require_once dirname(__DIR__).'/app/Domain/Auth/Access.php';
@@ -23,9 +24,10 @@ $store=new JsonStore($dir);
 $entities=new JsonEntityRepository($store,new EntityRepository());
 
 $checks=[];
-$checks['seed fallback']=count($entities->all())>=17;
+$checks['105 seed fallback']=count($entities->all())===105;
 $entities->save(['vertical'=>'schools','slug'=>'test-school','name'=>'Test School','location'=>'Pune','score'=>0,'highlight'=>'Test','tags'=>['CBSE'],'status'=>'draft']);
 $checks['entity persisted']=($entities->find('schools','test-school')['name']??'')==='Test School';
+$checks['seed retained after write']=count($entities->all())===106;
 
 $users=new JsonUserRepository($store);
 $user=$users->save(['name'=>'Editor','email'=>'editor@example.com','password_hash'=>password_hash('temporary-test-password',PASSWORD_DEFAULT),'roles'=>['editor'],'status'=>'active']);

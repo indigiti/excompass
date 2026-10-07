@@ -8,49 +8,29 @@ $private = $out . '/private';
 
 $remove = function (string $path) use (&$remove): void {
     if (!file_exists($path) && !is_link($path)) return;
-    if (is_file($path) || is_link($path)) {
-        @unlink($path);
-        return;
-    }
-    foreach (array_diff(scandir($path) ?: [], ['.','..']) as $name) {
-        $remove($path . '/' . $name);
-    }
+    if (is_file($path) || is_link($path)) { @unlink($path); return; }
+    foreach (array_diff(scandir($path) ?: [], ['.','..']) as $name) $remove($path . '/' . $name);
     @rmdir($path);
 };
 
 $copy = function (string $src, string $dst) use (&$copy): void {
     if (is_dir($src)) {
-        if (!is_dir($dst) && !mkdir($dst, 0755, true) && !is_dir($dst)) {
-            throw new RuntimeException("mkdir failed: {$dst}");
-        }
+        if (!is_dir($dst) && !mkdir($dst, 0755, true) && !is_dir($dst)) throw new RuntimeException("mkdir failed: {$dst}");
         foreach (array_diff(scandir($src) ?: [], ['.','..']) as $name) {
             if (in_array($name, ['.git','.github','release'], true)) continue;
             $copy($src . '/' . $name, $dst . '/' . $name);
         }
         return;
     }
-    if (!is_dir(dirname($dst)) && !mkdir(dirname($dst), 0755, true) && !is_dir(dirname($dst))) {
-        throw new RuntimeException("mkdir failed: " . dirname($dst));
-    }
-    if (!copy($src, $dst)) {
-        throw new RuntimeException("copy failed: {$src}");
-    }
+    if (!is_dir(dirname($dst)) && !mkdir(dirname($dst), 0755, true) && !is_dir(dirname($dst))) throw new RuntimeException("mkdir failed: " . dirname($dst));
+    if (!copy($src, $dst)) throw new RuntimeException("copy failed: {$src}");
 };
 
 $remove($out);
 mkdir($public, 0755, true);
 mkdir($private . '/build', 0755, true);
 
-$publicFiles = [
-    '.htaccess',
-    'runtime.php',
-    'index.php',
-    'rankings.php',
-    'entity.php',
-    'search.php',
-    'methodology.php',
-    'health.php',
-];
+$publicFiles = ['.htaccess','runtime.php','index.php','rankings.php','entity.php','search.php','methodology.php','health.php'];
 $publicDirs = ['assets','admin'];
 $privateDirs = ['app','config','bin','database'];
 
@@ -71,7 +51,7 @@ $sourceSha = (string) (getenv('GITHUB_SHA') ?: 'local');
 $build = [
     'schema' => 'DIGIOPS-RELEASE/1',
     'name' => 'ExCompass',
-    'version' => '1.0.0',
+    'version' => '1.1.0',
     'builtAt' => date(DATE_ATOM),
     'sourceSha' => $sourceSha,
     'branch' => (string) (getenv('GITHUB_REF_NAME') ?: 'local'),

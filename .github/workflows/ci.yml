@@ -31,6 +31,24 @@ jobs:
         run: php tests/scoring.php
       - name: Storage and workflow checks
         run: php tests/storage.php
+      - name: HTTP render smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          export EXCOMPASS_STORAGE_PATH="$RUNNER_TEMP/excompass-storage"
+          php -S 127.0.0.1:8097 > "$RUNNER_TEMP/excompass-http.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8097/health.php >/dev/null; then break; fi
+            sleep 0.2
+          done
+          curl -fsS http://127.0.0.1:8097/ | grep -q "Pune,"
+          curl -fsS "http://127.0.0.1:8097/rankings.php?vertical=real-estate" | grep -q "25"
+          curl -fsS "http://127.0.0.1:8097/search.php?q=Baner" | grep -q "Baner"
+          curl -fsS "http://127.0.0.1:8097/entity.php?vertical=real-estate&slug=godrej-emerald-waters" | grep -q "Godrej Emerald Waters"
+          curl -fsS http://127.0.0.1:8097/methodology.php | grep -q "ranking should explain itself"
+          curl -fsS http://127.0.0.1:8097/health.php | grep -q '"ok":true'
 
   release:
     runs-on: ubuntu-latest
