@@ -58,6 +58,7 @@ jobs:
 
           assert_contains "$RUNNER_TEMP/home.html" "Pune," "homepage renders"
           assert_contains "$RUNNER_TEMP/ranking.html" "Filter the shortlist" "rich ranking workspace renders"
+          assert_contains "$RUNNER_TEMP/ranking.html" 'class="is-active" aria-current="page"' "active category header state renders"
           assert_contains "$RUNNER_TEMP/ranking.html" "₹ 1.1 Cr" "real estate working facts render"
           assert_contains "$RUNNER_TEMP/ranking.html" "images.unsplash.com" "ranking remote photography renders"
           assert_contains "$RUNNER_TEMP/search.html" "Baner" "search renders Baner matches"
