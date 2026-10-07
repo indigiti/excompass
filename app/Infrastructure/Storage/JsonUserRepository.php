@@ -33,6 +33,65 @@ final class JsonUserRepository implements UserRepositoryInterface
         return null;
     }
 
+    public function hasAdmin(): bool
+    {
+        foreach ($this->store->read('users.json') as $user) {
+            if (
+                in_array('admin', (array)($user['roles'] ?? []), true) &&
+                ($user['status'] ?? 'disabled') === 'active'
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function createFirstAdmin(string $name, string $email, string $passwordHash): array
+    {
+        $name = trim($name);
+        $email = strtolower(trim($email));
+
+        if ($name === '') {
+            throw new InvalidArgumentException('A name is required.');
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException('A valid email is required.');
+        }
+        if ($passwordHash === '') {
+            throw new InvalidArgumentException('A password hash is required.');
+        }
+
+        $saved = [];
+        $this->store->update('users.json', function (array $users) use ($name, $email, $passwordHash, &$saved): array {
+            $maxId = 0;
+            foreach ($users as $user) {
+                $maxId = max($maxId, (int)($user['id'] ?? 0));
+                if (
+                    in_array('admin', (array)($user['roles'] ?? []), true) &&
+                    ($user['status'] ?? 'disabled') === 'active'
+                ) {
+                    throw new InvalidArgumentException('An administrator already exists.');
+                }
+                if (strtolower((string)($user['email'] ?? '')) === $email) {
+                    throw new InvalidArgumentException('That email is already in use.');
+                }
+            }
+
+            $saved = [
+                'id' => $maxId + 1,
+                'name' => $name,
+                'email' => $email,
+                'password_hash' => $passwordHash,
+                'roles' => ['admin'],
+                'status' => 'active',
+            ];
+            $users[] = $saved;
+            return array_values($users);
+        });
+
+        return $saved;
+    }
+
     public function save(array $user): array
     {
         $email = strtolower(trim((string) ($user['email'] ?? '')));
