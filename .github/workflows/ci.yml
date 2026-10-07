@@ -41,48 +41,30 @@ jobs:
           trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
           READY=0
           for i in {1..50}; do
-            if curl -fsS http://127.0.0.1:8097/health.php -o "$RUNNER_TEMP/health.json"; then
-              READY=1
-              break
-            fi
+            if curl -fsS http://127.0.0.1:8097/health.php -o "$RUNNER_TEMP/health.json"; then READY=1; break; fi
             sleep 0.2
           done
-          if [ "$READY" != "1" ]; then
-            cat "$RUNNER_TEMP/excompass-http.log"
-            exit 1
-          fi
-
-          fetch_page() {
-            local url="$1"
-            local file="$2"
-            curl -fsS "$url" -o "$file" || { cat "$RUNNER_TEMP/excompass-http.log"; exit 1; }
-          }
-          assert_contains() {
-            local file="$1"
-            local needle="$2"
-            local label="$3"
-            if ! grep -Fq "$needle" "$file"; then
-              echo "HTTP_ASSERTION_FAILED: $label"
-              echo "Expected: $needle"
-              head -c 2500 "$file" || true
-              echo
-              echo "--- server log ---"
-              cat "$RUNNER_TEMP/excompass-http.log" || true
-              exit 1
-            fi
-            echo "PASS  $label"
-          }
+          if [ "$READY" != "1" ]; then cat "$RUNNER_TEMP/excompass-http.log"; exit 1; fi
+          fetch_page(){ curl -fsS "$1" -o "$2" || { cat "$RUNNER_TEMP/excompass-http.log"; exit 1; }; }
+          assert_contains(){ if ! grep -Fq "$2" "$1"; then echo "HTTP_ASSERTION_FAILED: $3"; echo "Expected: $2"; head -c 3000 "$1" || true; echo; cat "$RUNNER_TEMP/excompass-http.log" || true; exit 1; fi; echo "PASS  $3"; }
 
           fetch_page "http://127.0.0.1:8097/" "$RUNNER_TEMP/home.html"
           fetch_page "http://127.0.0.1:8097/rankings.php?vertical=real-estate" "$RUNNER_TEMP/ranking.html"
           fetch_page "http://127.0.0.1:8097/search.php?q=Baner" "$RUNNER_TEMP/search.html"
           fetch_page "http://127.0.0.1:8097/entity.php?vertical=real-estate&slug=godrej-emerald-waters" "$RUNNER_TEMP/entity.html"
+          fetch_page "http://127.0.0.1:8097/compare.php?vertical=real-estate&items=godrej-emerald-waters,lodha-panache" "$RUNNER_TEMP/compare.html"
+          fetch_page "http://127.0.0.1:8097/report.php?vertical=real-estate" "$RUNNER_TEMP/report.html"
           fetch_page "http://127.0.0.1:8097/methodology.php" "$RUNNER_TEMP/methodology.html"
 
           assert_contains "$RUNNER_TEMP/home.html" "Pune," "homepage renders"
-          assert_contains "$RUNNER_TEMP/ranking.html" "Godrej Emerald Waters" "real estate ranking renders rows"
+          assert_contains "$RUNNER_TEMP/ranking.html" "Filter the shortlist" "rich ranking workspace renders"
+          assert_contains "$RUNNER_TEMP/ranking.html" "₹ 1.1 Cr" "real estate working facts render"
           assert_contains "$RUNNER_TEMP/search.html" "Baner" "search renders Baner matches"
-          assert_contains "$RUNNER_TEMP/entity.html" "Godrej Emerald Waters" "entity profile renders"
+          assert_contains "$RUNNER_TEMP/entity.html" "ExCompass score breakdown" "rich entity scoring renders"
+          assert_contains "$RUNNER_TEMP/entity.html" "Explore the area" "locality intelligence renders"
+          assert_contains "$RUNNER_TEMP/entity.html" "Score provenance" "evidence metadata renders"
+          assert_contains "$RUNNER_TEMP/compare.html" "Compare Real Estate" "comparison renders"
+          assert_contains "$RUNNER_TEMP/report.html" "Ranking Report" "report renders"
           assert_contains "$RUNNER_TEMP/methodology.html" "ranking should explain itself" "methodology renders"
           assert_contains "$RUNNER_TEMP/health.json" '"ok":true' "health endpoint renders"
 

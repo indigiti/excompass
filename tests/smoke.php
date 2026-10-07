@@ -7,6 +7,7 @@ $counts=[];
 foreach($entities->all() as $entity){
     $counts[$entity['vertical']]=($counts[$entity['vertical']]??0)+1;
 }
+$godrej=find_published_entity('real-estate','godrej-emerald-waters');
 
 $checks=[
     '17 verticals'=>count($verticals->all())===17,
@@ -16,8 +17,12 @@ $checks=[
         return $v['slug']==='real-estate'||($counts[$v['slug']]??0)===5;
     }))===17,
     'all demo data published'=>count(array_filter($entities->all(),static fn(array $e):bool=>($e['status']??'')==='published'))===105,
-    'ranking order'=>($ranking->rank($entities->forVertical('real-estate'))[0]['score']??0)>=90,
-    'search Baner'=>count($search->search($entities->all(),$verticals->all(),'Baner'))>=5,
+    'ranking order'=>($ranking->rank(published_for_vertical('real-estate'))[0]['score']??0)>=90,
+    'rich profile category'=>($godrej['category']??'')==='Apartment',
+    'rich profile budget'=>($godrej['tier']??'')==='₹1–2 Cr',
+    'rich profile breakdown'=>count($godrej['breakdown']??[])===7,
+    'rich profile evidence'=>count($godrej['evidence']??[])>=4,
+    'search Baner'=>count($search->search(published_entities(),$verticals->all(),'Baner'))>=5,
     'subdirectory URL'=>u('search.php')===(($config['base_path']?:'').'/search.php'),
 ];
 
