@@ -14,7 +14,7 @@ page_header($q?'Search: '.$q:'Explore ExCompass');
   </form>
   <div class="results" data-reveal>
     <?php foreach($results as $x):$v=$verticals->find($x['vertical']);?>
-      <a class="result" style="--accent:<?=e($v['accent'])?>" href="<?=e(entity_url($x['vertical'],$x['slug']))?>"><span class="icon-tile"><?=ExCompassSupportIcon::svg($v['icon'])?></span><div><small><?=e($v['name'])?></small><b><?=e($x['name'])?></b><p><?=e($x['location'])?> · <?=e($x['highlight'])?></p></div><strong><?=e((string)$x['score'])?></strong></a>
+      <a class="result" style="--accent:<?=e($v['accent'])?>" href="<?=e(entity_url($x['vertical'],$x['slug']))?>"><span class="icon-tile"><?=icon_svg($v['icon'])?></span><div><small><?=e($v['name'])?></small><b><?=e($x['name'])?></b><p><?=e($x['location'])?> · <?=e($x['highlight'])?></p></div><strong><?=e((string)$x['score'])?></strong></a>
     <?php endforeach;?>
     <?php if(!$results):?><div class="empty">No match yet. Try a locality, category or broader need.</div><?php endif;?>
   </div>
