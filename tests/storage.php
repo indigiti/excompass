@@ -35,6 +35,12 @@ $checks['seed retained after write']=count($entities->all())===106;
 $users=new JsonUserRepository($store);
 $user=$users->save(['name'=>'Editor','email'=>'editor@example.com','password_hash'=>password_hash('temporary-test-password',PASSWORD_DEFAULT),'roles'=>['editor'],'status'=>'active']);
 $checks['user persisted']=($users->findByEmail('editor@example.com')['id']??0)===$user['id'];
+$checks['editor is not admin']=!$users->hasAdmin();
+$firstAdmin=$users->createFirstAdmin('Administrator','admin@example.com',password_hash('temporary-admin-password',PASSWORD_DEFAULT));
+$checks['first admin created']=in_array('admin',$firstAdmin['roles']??[],true)&&$users->hasAdmin();
+$duplicateBlocked=false;
+try{$users->createFirstAdmin('Second Admin','admin2@example.com',password_hash('temporary-admin-password',PASSWORD_DEFAULT));}catch(InvalidArgumentException){$duplicateBlocked=true;}
+$checks['second first-admin bootstrap blocked']=$duplicateBlocked;
 
 $workflow=new EntityWorkflow(new Access());
 $checks['editor can approve']=$workflow->canTransition($user,'review','approved');
