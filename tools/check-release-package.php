@@ -6,7 +6,7 @@ function must(bool $ok,string $message):void{if(!$ok)throw new RuntimeException(
 $required=[
  'RELEASE.json','public/.htaccess','public/runtime.php','public/index.php','public/rankings.php','public/entity.php','public/search.php',
  'public/methodology.php','public/health.php','public/compare.php','public/report.php','public/brochure.php','public/badge.php','public/lead.php','public/city.php','public/area.php',
- 'public/assets/css/app.css','public/assets/css/admin.css','public/assets/js/app.js','public/admin/index.php','public/admin/login.php','public/admin/setup.php','public/admin/leads.php','public/admin/entity.php',
+ 'public/assets/css/app.css','public/assets/css/admin.css','public/assets/js/app.js','public/admin/index.php','public/admin/login.php','public/admin/setup.php','public/admin/account.php','public/admin/leads.php','public/admin/entity.php',
  'private/app/bootstrap.php','private/app/Domain/Catalog/DemoEntityCatalog.php','private/app/Domain/Catalog/VerticalDetailRepository.php','private/app/Domain/Catalog/RemoteMediaCatalog.php','private/app/Domain/Media/RemoteImagePolicy.php',
  'private/app/Domain/Catalog/EntityProfileService.php','private/app/Domain/Geo/CityRepository.php','private/app/Domain/Geo/AreaDirectory.php','private/config/app.php','private/config/cities.php','private/config/storage.php','private/config/auth.php',
  'private/bin/create-admin.php','private/database/migrations/001_core.sql','private/build/release.json',
@@ -16,7 +16,7 @@ $meta=json_decode((string)file_get_contents($release.'/RELEASE.json'),true);
 must(is_array($meta),'invalid RELEASE.json');
 must(($meta['schema']??'')==='DIGIOPS-RELEASE/1','release schema mismatch');
 must(($meta['name']??'')==='ExCompass','release name mismatch');
-must(($meta['version']??'')==='1.4.2','release version mismatch');
+must(($meta['version']??'')==='1.4.3','release version mismatch');
 must(($meta['publicPath']??'')==='public_html/excompass/','public path mismatch');
 must(($meta['privatePath']??'')==='private_html/excompass/','private path mismatch');
 must(($meta['persistentPaths']??[])===['storage/'],'persistent storage contract mismatch');
@@ -49,8 +49,12 @@ must(str_contains($repository,'city_slug'),'city-scoped entity identity missing'
 must(str_contains($repository,'area_slug'),'area-scoped entity identity missing');
 $userRepo=(string)file_get_contents($release.'/private/app/Infrastructure/Storage/JsonUserRepository.php');
 must(str_contains($userRepo,'createFirstAdmin'),'first-admin bootstrap repository contract missing');
+must(str_contains($userRepo,'updatePassword'),'password update repository contract missing');
 $setupPage=(string)file_get_contents($release.'/public/admin/setup.php');
 must(str_contains($setupPage,'Create first admin'),'first-admin setup page missing');
+$accountPage=(string)file_get_contents($release.'/public/admin/account.php');
+must(str_contains($accountPage,'Change password'),'admin password screen missing');
+must(str_contains($accountPage,'current_password'),'current-password verification missing');
 $dbSchema=(string)file_get_contents($release.'/private/database/migrations/001_core.sql');
 must(str_contains($dbSchema,'CREATE TABLE cities'),'future DB city table missing');
 must(str_contains($dbSchema,'uq_entity_city_vertical_slug'),'future DB city/entity uniqueness missing');
