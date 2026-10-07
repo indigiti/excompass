@@ -54,6 +54,14 @@ final class SessionAuth
         return true;
     }
 
+    public function rotateSession(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+            $_SESSION['auth_last_seen'] = time();
+        }
+    }
+
     public function logout(): void
     {
         $_SESSION = [];
