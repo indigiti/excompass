@@ -7,7 +7,7 @@ $required=[
  'RELEASE.json','public/.htaccess','public/runtime.php','public/index.php','public/rankings.php','public/entity.php','public/search.php',
  'public/methodology.php','public/health.php','public/compare.php','public/report.php','public/brochure.php','public/badge.php','public/lead.php',
  'public/assets/css/app.css','public/assets/css/admin.css','public/assets/js/app.js','public/admin/index.php','public/admin/login.php','public/admin/leads.php','public/admin/entity.php',
- 'private/app/bootstrap.php','private/app/Domain/Catalog/DemoEntityCatalog.php','private/app/Domain/Catalog/VerticalDetailRepository.php',
+ 'private/app/bootstrap.php','private/app/Domain/Catalog/DemoEntityCatalog.php','private/app/Domain/Catalog/VerticalDetailRepository.php','private/app/Domain/Catalog/RemoteMediaCatalog.php','private/app/Domain/Media/RemoteImagePolicy.php',
  'private/app/Domain/Catalog/EntityProfileService.php','private/config/app.php','private/config/storage.php','private/config/auth.php',
  'private/bin/create-admin.php','private/database/migrations/001_core.sql','private/build/release.json',
 ];
@@ -16,7 +16,7 @@ $meta=json_decode((string)file_get_contents($release.'/RELEASE.json'),true);
 must(is_array($meta),'invalid RELEASE.json');
 must(($meta['schema']??'')==='DIGIOPS-RELEASE/1','release schema mismatch');
 must(($meta['name']??'')==='ExCompass','release name mismatch');
-must(($meta['version']??'')==='1.2.0','release version mismatch');
+must(($meta['version']??'')==='1.3.0','release version mismatch');
 must(($meta['publicPath']??'')==='public_html/excompass/','public path mismatch');
 must(($meta['privatePath']??'')==='private_html/excompass/','private path mismatch');
 must(($meta['persistentPaths']??[])===['storage/'],'persistent storage contract mismatch');
@@ -32,6 +32,11 @@ foreach(['index.php','rankings.php','entity.php','search.php','methodology.php',
 $profile=(string)file_get_contents($release.'/private/app/Domain/Catalog/EntityProfileService.php');
 must(str_contains($profile,'score_version'),'rich profile metadata missing');
 must(str_contains($profile,'breakdown'),'rich scoring breakdown missing');
+must(str_contains($profile,'media->enrich'),'remote media enrichment missing');
+$media=(string)file_get_contents($release.'/private/app/Domain/Media/RemoteImagePolicy.php');
+must(str_contains($media,"'https'"),'remote image HTTPS policy missing');
+$entityPage=(string)file_get_contents($release.'/public/entity.php');
+must(str_contains($entityPage,'Representative demo photography'),'image provenance disclosure missing');
 foreach(['public/app','public/config','public/storage','public/database','public/.env','private/.env'] as $forbidden)must(!file_exists($release.'/'.$forbidden),"forbidden release path: {$forbidden}");
 $iterator=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($release,FilesystemIterator::SKIP_DOTS));
 foreach($iterator as $file){must(!$file->isLink(),'symlink not allowed: '.$file->getPathname());must(!str_ends_with($file->getFilename(),'.json')||!str_contains($file->getPathname(),'/storage/'),'runtime data must not ship: '.$file->getPathname());}
