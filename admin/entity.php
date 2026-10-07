@@ -206,8 +206,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($isNew && !$entity) {
+    $newCity=$cities->find($citySlug)??$cities->default();
     $entity = [
-        'city_slug'=>(string)$cities->default()['slug'],'city_name'=>(string)$cities->default()['name'],'area_name'=>'','area_slug'=>'',
+        'city_slug'=>(string)$newCity['slug'],'city_name'=>(string)$newCity['name'],'area_name'=>'','area_slug'=>'',
         'vertical'=>'real-estate','slug'=>'','name'=>'','location'=>'','locality'=>'','score'=>0,'highlight'=>'','tags'=>[],'status'=>'draft',
         'category'=>'Apartment','tier'=>'₹1–2 Cr','availability'=>'2027','intent'=>'Family','primary'=>'','secondary'=>'','tertiary'=>'',
         'description'=>'','observation'=>'','best_for'=>[],'badges'=>[],'standout'=>[],'liked'=>[],'consider'=>[],'evidence'=>[],
