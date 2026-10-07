@@ -6,7 +6,7 @@ function must(bool $ok,string $message):void{if(!$ok)throw new RuntimeException(
 $required=[
  'RELEASE.json','public/.htaccess','public/runtime.php','public/index.php','public/rankings.php','public/entity.php','public/search.php',
  'public/methodology.php','public/health.php','public/compare.php','public/report.php','public/brochure.php','public/badge.php','public/lead.php',
- 'public/assets/css/app.css','public/assets/css/admin.css','public/assets/js/app.js','public/admin/index.php','public/admin/login.php',
+ 'public/assets/css/app.css','public/assets/css/admin.css','public/assets/js/app.js','public/admin/index.php','public/admin/login.php','public/admin/leads.php','public/admin/entity.php',
  'private/app/bootstrap.php','private/app/Domain/Catalog/DemoEntityCatalog.php','private/app/Domain/Catalog/VerticalDetailRepository.php',
  'private/app/Domain/Catalog/EntityProfileService.php','private/config/app.php','private/config/storage.php','private/config/auth.php',
  'private/bin/create-admin.php','private/database/migrations/001_core.sql','private/build/release.json',
