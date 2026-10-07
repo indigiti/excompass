@@ -41,7 +41,7 @@ jobs:
           trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
           READY=0
           for i in {1..50}; do
-            if curl -fsS http://127.0.0.1:8097/health.php >/dev/null; then
+            if curl -fsS http://127.0.0.1:8097/health.php -o "$RUNNER_TEMP/health.json"; then
               READY=1
               break
             fi
@@ -51,12 +51,17 @@ jobs:
             cat "$RUNNER_TEMP/excompass-http.log"
             exit 1
           fi
-          curl -fsS http://127.0.0.1:8097/ | grep -q "Pune,"
-          curl -fsS "http://127.0.0.1:8097/rankings.php?vertical=real-estate" | grep -q "25"
-          curl -fsS "http://127.0.0.1:8097/search.php?q=Baner" | grep -q "Baner"
-          curl -fsS "http://127.0.0.1:8097/entity.php?vertical=real-estate&slug=godrej-emerald-waters" | grep -q "Godrej Emerald Waters"
-          curl -fsS http://127.0.0.1:8097/methodology.php | grep -q "ranking should explain itself"
-          curl -fsS http://127.0.0.1:8097/health.php | grep -q '"ok":true'
+          curl -fsS http://127.0.0.1:8097/ -o "$RUNNER_TEMP/home.html"
+          curl -fsS "http://127.0.0.1:8097/rankings.php?vertical=real-estate" -o "$RUNNER_TEMP/ranking.html"
+          curl -fsS "http://127.0.0.1:8097/search.php?q=Baner" -o "$RUNNER_TEMP/search.html"
+          curl -fsS "http://127.0.0.1:8097/entity.php?vertical=real-estate&slug=godrej-emerald-waters" -o "$RUNNER_TEMP/entity.html"
+          curl -fsS http://127.0.0.1:8097/methodology.php -o "$RUNNER_TEMP/methodology.html"
+          grep -q "Pune," "$RUNNER_TEMP/home.html"
+          grep -q "25" "$RUNNER_TEMP/ranking.html"
+          grep -q "Baner" "$RUNNER_TEMP/search.html"
+          grep -q "Godrej Emerald Waters" "$RUNNER_TEMP/entity.html"
+          grep -q "ranking should explain itself" "$RUNNER_TEMP/methodology.html"
+          grep -q '"ok":true' "$RUNNER_TEMP/health.json"
 
   release:
     runs-on: ubuntu-latest
