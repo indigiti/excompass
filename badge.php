@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 require __DIR__.'/runtime.php';
-$vs=trim((string)($_GET['vertical']??''));$slug=trim((string)($_GET['slug']??''));
-$v=$verticals->find($vs);$x=find_published_entity($vs,$slug);
+$vs=trim((string)($_GET['vertical']??''));$slug=trim((string)($_GET['slug']??''));$citySlug=current_city_slug();
+$v=$verticals->find($vs);$x=find_published_entity($vs,$slug,$citySlug);
 if(!$v||!$x){http_response_code(404);exit('Not found');}
 $name=preg_replace('/[^a-z0-9-]+/i','-',$x['slug']).'-excompass-badge.svg';
 header('Content-Type: image/svg+xml; charset=UTF-8');header('Content-Disposition: attachment; filename="'.$name.'"');
