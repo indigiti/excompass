@@ -223,6 +223,7 @@ function page_footer(): void {
         <p>Demo enquiries are stored in the database-free JSON runtime so the complete workflow can be tested.</p>
         <form action="<?=e(u('lead.php'))?>" method="post" class="lead-form">
           <input type="hidden" name="_token" value="<?=e(csrf_token())?>">
+          <input type="hidden" name="city" data-lead-city value="<?=e(current_city_slug())?>">
           <input type="hidden" name="vertical" data-lead-vertical value="">
           <input type="hidden" name="entity" data-lead-entity value="">
           <input type="hidden" name="type" data-lead-type value="enquiry">
