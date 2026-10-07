@@ -47,6 +47,10 @@ must(!str_contains($cityConfig,"'mumbai'"),'unexpected second city in registry')
 $repository=(string)file_get_contents($release.'/private/app/Infrastructure/Storage/JsonEntityRepository.php');
 must(str_contains($repository,'city_slug'),'city-scoped entity identity missing');
 must(str_contains($repository,'area_slug'),'area-scoped entity identity missing');
+$dbSchema=(string)file_get_contents($release.'/private/database/migrations/001_core.sql');
+must(str_contains($dbSchema,'CREATE TABLE cities'),'future DB city table missing');
+must(str_contains($dbSchema,'uq_entity_city_vertical_slug'),'future DB city/entity uniqueness missing');
+must(str_contains($dbSchema,'uq_ranking_scope_version'),'future DB ranking geography scope missing');
 foreach(['public/app','public/config','public/storage','public/database','public/.env','private/.env'] as $forbidden)must(!file_exists($release.'/'.$forbidden),"forbidden release path: {$forbidden}");
 $iterator=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($release,FilesystemIterator::SKIP_DOTS));
 foreach($iterator as $file){must(!$file->isLink(),'symlink not allowed: '.$file->getPathname());must(!str_ends_with($file->getFilename(),'.json')||!str_contains($file->getPathname(),'/storage/'),'runtime data must not ship: '.$file->getPathname());}
