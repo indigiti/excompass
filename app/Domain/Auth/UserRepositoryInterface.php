@@ -9,5 +9,6 @@ interface UserRepositoryInterface
     public function findById(int $id): ?array;
     public function hasAdmin(): bool;
     public function createFirstAdmin(string $name, string $email, string $passwordHash): array;
+    public function updatePassword(int $userId, string $passwordHash): array;
     public function save(array $user): array;
 }
