@@ -60,7 +60,7 @@ function find_published_entity(string $vertical,string $slug): ?array {
 
 function page_header(string $title): void {
     global $config,$verticals;
-    ?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b0d"><meta name="color-scheme" content="light dark"><title><?=e($title)?> · <?=e($config['name'])?></title><meta name="description" content="Independent rankings, comparisons and local intelligence for <?=e($config['city'])?>."><link rel="stylesheet" href="<?=e(u('assets/css/app.css'))?>"></head><body>
+    ?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b0d"><meta name="color-scheme" content="light"><title><?=e($title)?> · <?=e($config['name'])?></title><meta name="description" content="Independent rankings, comparisons and local intelligence for <?=e($config['city'])?>."><link rel="stylesheet" href="<?=e(u('assets/css/app.css?v=20261007-visual-audit-1'))?>"></head><body>
     <a class="skip-link" href="#content">Skip to content</a>
     <header class="site-header" data-header>
       <div class="shell nav">
@@ -91,5 +91,5 @@ function page_footer(): void {
       <div><small>WORKING DATA</small><p>Current catalog entries and scores are demonstration data for product development.</p></div>
       <div><small>LOCATION</small><p><?=e($config['city'])?> · India</p></div>
     </div><div class="shell footer-bottom"><span>© <?=date('Y')?> ExCompass</span><a href="<?=e(u('methodology.php'))?>">How rankings work</a><a href="<?=e(u('health.php'))?>">System status</a></div></footer>
-    <script src="<?=e(u('assets/js/app.js'))?>" defer></script></body></html><?php
+    <script src="<?=e(u('assets/js/app.js?v=20261007-visual-audit-1'))?>" defer></script></body></html><?php
 }
