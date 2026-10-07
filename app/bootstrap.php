@@ -42,6 +42,7 @@ function u(string $path=''): string {
 }
 function vertical_url(string $slug): string { return u(rawurlencode($slug).'/'); }
 function entity_url(string $vertical,string $slug): string { return u(rawurlencode($vertical).'/'.rawurlencode($slug).'/'); }
+function icon_svg(string $key): string { return Icon::svg($key); }
 
 function published_entities(): array {
     global $entities;
