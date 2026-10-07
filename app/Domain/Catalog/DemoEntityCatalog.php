@@ -153,7 +153,12 @@ final class DemoEntityCatalog
         foreach ($groups as $vertical => $items) {
             foreach ($items as $item) {
                 [$slug,$name,$location,$score,$highlight,$tags] = $item;
+                $areaSlug = trim((string)preg_replace('/[^a-z0-9]+/i','-',strtolower($location)),'-');
                 $entities[] = [
+                    'city_slug' => 'pune',
+                    'city_name' => 'Pune',
+                    'area_name' => $location,
+                    'area_slug' => $areaSlug,
                     'vertical' => $vertical,
                     'slug' => $slug,
                     'name' => $name,
