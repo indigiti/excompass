@@ -36,7 +36,8 @@ must(str_contains($profile,'media->enrich'),'remote media enrichment missing');
 $media=(string)file_get_contents($release.'/private/app/Domain/Media/RemoteImagePolicy.php');
 must(str_contains($media,"'https'"),'remote image HTTPS policy missing');
 $entityPage=(string)file_get_contents($release.'/public/entity.php');
-must(str_contains($entityPage,'Representative demo photography'),'image provenance disclosure missing');
+must(str_contains($entityPage,'image_disclaimer'),'image provenance disclosure missing');
+must(str_contains($entityPage,'gallery_image_urls'),'remote gallery rendering missing');
 foreach(['public/app','public/config','public/storage','public/database','public/.env','private/.env'] as $forbidden)must(!file_exists($release.'/'.$forbidden),"forbidden release path: {$forbidden}");
 $iterator=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($release,FilesystemIterator::SKIP_DOTS));
 foreach($iterator as $file){must(!$file->isLink(),'symlink not allowed: '.$file->getPathname());must(!str_ends_with($file->getFilename(),'.json')||!str_contains($file->getPathname(),'/storage/'),'runtime data must not ship: '.$file->getPathname());}
