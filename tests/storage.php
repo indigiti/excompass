@@ -25,8 +25,11 @@ $entities=new JsonEntityRepository($store,new EntityRepository());
 
 $checks=[];
 $checks['105 seed fallback']=count($entities->all())===105;
-$entities->save(['vertical'=>'schools','slug'=>'test-school','name'=>'Test School','location'=>'Pune','score'=>0,'highlight'=>'Test','tags'=>['CBSE'],'status'=>'draft']);
-$checks['entity persisted']=($entities->find('schools','test-school')['name']??'')==='Test School';
+$entities->save(['vertical'=>'schools','slug'=>'test-school','name'=>'Test School','location'=>'Baner','score'=>0,'highlight'=>'Test','tags'=>['CBSE'],'status'=>'draft']);
+$savedSchool=$entities->findInCity('pune','schools','test-school');
+$checks['entity persisted']=($savedSchool['name']??'')==='Test School';
+$checks['entity city normalized']=($savedSchool['city_slug']??'')==='pune';
+$checks['entity area normalized']=($savedSchool['area_slug']??'')==='baner';
 $checks['seed retained after write']=count($entities->all())===106;
 
 $users=new JsonUserRepository($store);
