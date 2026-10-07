@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__.'/app/bootstrap.php';
+require __DIR__.'/runtime.php';
 $vs=trim((string)($_GET['vertical']??''));$slug=trim((string)($_GET['slug']??''));
 $v=$verticals->find($vs);$x=find_published_entity($vs,$slug);
 if(!$v||!$x){http_response_code(404);page_header('Profile not found');echo '<main class="shell section"><h1>Profile not found</h1></main>';page_footer();exit;}

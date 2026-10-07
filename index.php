@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__.'/app/bootstrap.php';
+require __DIR__.'/runtime.php';
 $all=$verticals->all();
 $tops=[];
 foreach($all as $v){$r=$ranking->rank(published_for_vertical($v['slug']));if($r)$tops[$v['slug']]=$r[0];}

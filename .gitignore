@@ -2,5 +2,6 @@
 /storage/data/*.lock
 /storage/data/excompass_*
 !/storage/data/.gitkeep
+/release/
 .env
 .DS_Store

@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__.'/app/bootstrap.php';
+require __DIR__.'/runtime.php';
 $q=trim((string)($_GET['q']??''));$filter=trim((string)($_GET['vertical']??''));
 $results=$search->search(published_entities(),$verticals->all(),$q,$filter?:null);
 page_header($q?'Search: '.$q:'Explore ExCompass');

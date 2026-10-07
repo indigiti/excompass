@@ -24,7 +24,24 @@ The database directory is retained only as a future compatibility contract. A fu
 - JSON audit trail for editorial changes
 - Catalog, Ranking and Search domain separation
 - Subdirectory-safe URLs
-- GitHub CI: syntax, smoke, scoring and storage/workflow checks
+- GitHub CI with DigiOps release packaging
+
+## DigiOps deployment
+
+Every successful push to main produces the artifact:
+
+digiops-release
+
+Release contract:
+
+- schema: DIGIOPS-RELEASE/1
+- browser route: /excompass/
+- public target: public_html/excompass/
+- private target: private_html/excompass/
+- persistent private path: storage/
+- health endpoint: /excompass/health.php
+
+The public payload contains only web entrypoints, assets and the Admin UI. Application code, configuration, CLI tools and the future DB schema remain in the private payload. The public runtime bridge resolves private_html/excompass automatically.
 
 ## Local run
 
@@ -32,7 +49,7 @@ php -S 127.0.0.1:8080
 
 Open http://127.0.0.1:8080
 
-For a subdirectory deployment set EXCOMPASS_BASE_PATH, for example /excompass.
+For a subdirectory development environment set EXCOMPASS_BASE_PATH, for example /excompass.
 
 ## Create first admin
 
@@ -40,6 +57,8 @@ Set a strong password in the environment, then run:
 
 EXCOMPASS_ADMIN_PASSWORD='replace-with-12-plus-characters' php bin/create-admin.php 'Admin Name' admin@example.com
 
-Then open /admin/.
+On DigiOps the command should be run from private_html/excompass.
+
+Then open /excompass/admin/.
 
 Current entity records and scores are illustrative. Production rankings should use evidence-backed, editorially reviewed and versioned scoring.

@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-require_once dirname(__DIR__) . '/app/bootstrap.php';
-require_once dirname(__DIR__) . '/app/Domain/Auth/UserRepositoryInterface.php';
-require_once dirname(__DIR__) . '/app/Domain/Auth/Access.php';
-require_once dirname(__DIR__) . '/app/Infrastructure/Storage/JsonUserRepository.php';
-require_once dirname(__DIR__) . '/app/Infrastructure/Auth/SessionAuth.php';
-require_once dirname(__DIR__) . '/app/Support/Csrf.php';
-require_once dirname(__DIR__) . '/app/Domain/Editorial/EntityWorkflow.php';
+require_once dirname(__DIR__) . '/runtime.php';
+require_once EXCOMPASS_PRIVATE_ROOT_PATH . '/app/Domain/Auth/UserRepositoryInterface.php';
+require_once EXCOMPASS_PRIVATE_ROOT_PATH . '/app/Domain/Auth/Access.php';
+require_once EXCOMPASS_PRIVATE_ROOT_PATH . '/app/Infrastructure/Storage/JsonUserRepository.php';
+require_once EXCOMPASS_PRIVATE_ROOT_PATH . '/app/Infrastructure/Auth/SessionAuth.php';
+require_once EXCOMPASS_PRIVATE_ROOT_PATH . '/app/Support/Csrf.php';
+require_once EXCOMPASS_PRIVATE_ROOT_PATH . '/app/Domain/Editorial/EntityWorkflow.php';
 
 use ExCompass\Domain\Auth\Access;
 use ExCompass\Domain\Editorial\EntityWorkflow;
@@ -15,7 +15,7 @@ use ExCompass\Infrastructure\Auth\SessionAuth;
 use ExCompass\Infrastructure\Storage\JsonUserRepository;
 use ExCompass\Support\Csrf;
 
-$authConfig = require dirname(__DIR__) . '/config/auth.php';
+$authConfig = require EXCOMPASS_PRIVATE_ROOT_PATH . '/config/auth.php';
 $access = new Access();
 $userRepository = new JsonUserRepository($store);
 $auth = new SessionAuth($userRepository, $authConfig);
