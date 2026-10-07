@@ -5,20 +5,13 @@ namespace ExCompass\Domain\Geo;
 
 final class CityRepository
 {
+    public function __construct(private readonly array $cities)
+    {
+    }
+
     public function all(): array
     {
-        return [
-            [
-                'slug'=>'pune',
-                'name'=>'Pune',
-                'state'=>'Maharashtra',
-                'country'=>'India',
-                'active'=>true,
-                'default'=>true,
-                'latitude'=>18.5204,
-                'longitude'=>73.8567,
-            ],
-        ];
+        return array_values($this->cities);
     }
 
     public function active(): array
@@ -29,7 +22,7 @@ final class CityRepository
     public function find(string $slug): ?array
     {
         foreach($this->all() as $city){
-            if($city['slug']===$slug) return $city;
+            if(($city['slug']??'')===$slug) return $city;
         }
         return null;
     }
@@ -39,6 +32,10 @@ final class CityRepository
         foreach($this->active() as $city){
             if(!empty($city['default'])) return $city;
         }
-        return $this->active()[0];
+        $active=$this->active();
+        if(!$active){
+            throw new \RuntimeException('At least one active city is required.');
+        }
+        return $active[0];
     }
 }
