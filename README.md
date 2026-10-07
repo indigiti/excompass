@@ -24,6 +24,7 @@ The public experience is built as a premium editorial discovery product rather t
 - JSON-backed enquiry capture with Admin inbox
 - external HTTPS photography with no image files copied into ExCompass
 - image-host allowlist, source/credit metadata, verification flag and automatic visual fallback
+- compact premium header with responsive navigation and active category rail state
 
 The development seed catalog contains exactly **105 published demo profiles** so the whole product can be tested without manual setup:
 
@@ -59,7 +60,7 @@ Every successful push to main produces the artifact named digiops-release.
 Release contract:
 
 - schema: DIGIOPS-RELEASE/1
-- version: 1.3.0
+- version: 1.3.1
 - browser route: /excompass/
 - public target: public_html/excompass/
 - private target: private_html/excompass/
