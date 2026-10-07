@@ -76,8 +76,10 @@ function u(string $path=''): string {
 function current_city_slug(): string {
     global $cities;
     $candidate=strtolower(trim((string)($_GET['city']??'')));
-    $city=$candidate!==''?$cities->find($candidate):null;
-    if($city && !empty($city['active'])) return (string)$city['slug'];
+    if($candidate!==''){
+        $city=$cities->find($candidate);
+        return ($city && !empty($city['active'])) ? (string)$city['slug'] : $candidate;
+    }
     return (string)$cities->default()['slug'];
 }
 function current_city(): array {
@@ -242,5 +244,5 @@ function page_footer(): void {
       <div><small>WORKING DATA</small><p>Current catalog entries and scores are demonstration data for product development.</p></div>
       <div><small>LOCATION</small><p><?=e((string)$city['name'])?> · <?=e((string)$city['state'])?></p></div>
     </div><div class="shell footer-bottom"><span>© <?=date('Y')?> ExCompass</span><a href="<?=e(u('methodology.php'))?>">How rankings work</a><a href="<?=e(u('health.php'))?>">System status</a></div></footer>
-    <script src="<?=e(u('assets/js/app.js?v=20261007-remote-media-1'))?>" defer></script></body></html><?php
+    <script src="<?=e(u('assets/js/app.js?v=20261007-geo-1'))?>" defer></script></body></html><?php
 }
