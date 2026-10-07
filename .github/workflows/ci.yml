@@ -36,13 +36,21 @@ jobs:
         run: |
           set -euo pipefail
           export EXCOMPASS_STORAGE_PATH="$RUNNER_TEMP/excompass-storage"
-          php -S 127.0.0.1:8097 > "$RUNNER_TEMP/excompass-http.log" 2>&1 &
+          php -S 127.0.0.1:8097 -t . > "$RUNNER_TEMP/excompass-http.log" 2>&1 &
           SERVER_PID=$!
           trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
-          for i in {1..30}; do
-            if curl -fsS http://127.0.0.1:8097/health.php >/dev/null; then break; fi
+          READY=0
+          for i in {1..50}; do
+            if curl -fsS http://127.0.0.1:8097/health.php >/dev/null; then
+              READY=1
+              break
+            fi
             sleep 0.2
           done
+          if [ "$READY" != "1" ]; then
+            cat "$RUNNER_TEMP/excompass-http.log"
+            exit 1
+          fi
           curl -fsS http://127.0.0.1:8097/ | grep -q "Pune,"
           curl -fsS "http://127.0.0.1:8097/rankings.php?vertical=real-estate" | grep -q "25"
           curl -fsS "http://127.0.0.1:8097/search.php?q=Baner" | grep -q "Baner"
