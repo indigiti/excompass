@@ -192,14 +192,14 @@ function page_header(string $title): void {
         }
     }
     $city=current_city();
-    ?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b0d"><meta name="color-scheme" content="light"><title><?=e($title)?> · <?=e($config['name'])?></title><meta name="description" content="Independent rankings, comparisons and local intelligence for <?=e($config['city'])?>."><link rel="stylesheet" href="<?=e(u('assets/css/app.css?v=20261007-geo-1'))?>"></head><body>
+    ?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b0d"><meta name="color-scheme" content="light"><title><?=e($title)?> · <?=e($config['name'])?></title><meta name="description" content="Independent rankings, comparisons and local intelligence for <?=e((string)$city['name'])?>."><link rel="stylesheet" href="<?=e(u('assets/css/app.css?v=20261007-geo-1'))?>"></head><body>
     <a class="skip-link" href="#content">Skip to content</a>
     <header class="site-header" data-header>
       <div class="shell nav">
         <a class="brand" href="<?=e(u())?>" aria-label="ExCompass home"><span class="brand-mark">Ex</span><span>Compass</span></a>
         <a class="city-chip" href="<?=e(city_url((string)$city['slug']))?>" aria-label="Current city <?=e((string)$city['name'])?>"><span>⌖</span><b><?=e((string)$city['name'])?></b><?php if(count($cities->active())>1):?><i>⌄</i><?php endif;?></a>
         <nav class="primary-nav" aria-label="Primary navigation">
-          <a href="<?=e(u())?>">Discover</a>
+          <a href="<?=e(city_url((string)$city['slug']))?>">Discover</a>
           <a href="<?=e(vertical_url('localities',(string)$city['slug']))?>">Neighbourhoods</a>
           <a href="<?=e(u('methodology.php'))?>">Methodology</a>
         </nav>
@@ -207,11 +207,11 @@ function page_header(string $title): void {
           <input type="hidden" name="city" value="<?=e((string)$city['slug'])?>">
           <span aria-hidden="true">⌕</span><input name="q" aria-label="Search ExCompass" placeholder="Search <?=e((string)$city['name'])?>"><button>Search</button>
         </form>
-        <a class="nav-cta" href="<?=e(u('search.php'))?>">Explore</a>
+        <a class="nav-cta" href="<?=e(u('search.php?city='.rawurlencode((string)$city['slug'])))?>">Explore</a>
         <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" data-nav-toggle>☰</button>
       </div>
       <div class="mobile-nav" data-mobile-nav>
-        <a href="<?=e(city_url((string)$city['slug']))?>">Discover <?=e((string)$city['name'])?></a><a href="<?=e(vertical_url('localities',(string)$city['slug']))?>">Neighbourhoods</a><a href="<?=e(u('methodology.php'))?>">Methodology</a><a href="<?=e(u('search.php'))?>">Search</a>
+        <a href="<?=e(city_url((string)$city['slug']))?>">Discover <?=e((string)$city['name'])?></a><a href="<?=e(vertical_url('localities',(string)$city['slug']))?>">Neighbourhoods</a><a href="<?=e(u('methodology.php'))?>">Methodology</a><a href="<?=e(u('search.php?city='.rawurlencode((string)$city['slug'])))?>">Search</a>
       </div>
     </header>
     <div class="rail" aria-label="Explore categories"><div class="rail-inner"><?php foreach($verticals->all() as $v):$isActive=$activeVertical===$v['slug']; ?><a class="<?=$isActive?'is-active':''?>" <?=$isActive?'aria-current="page"':''?> style="--accent:<?=e($v['accent'])?>" href="<?=e(vertical_url($v['slug'],(string)$city['slug']))?>"><span><?=Icon::svg($v['icon'])?></span><small><?=e($v['name'])?></small></a><?php endforeach; ?></div></div>
