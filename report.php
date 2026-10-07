@@ -4,7 +4,8 @@ require __DIR__.'/runtime.php';
 $slug=trim((string)($_GET['vertical']??'real-estate'));
 $citySlug=current_city_slug();
 $areaSlug=current_area_slug();
-$city=$cities->find($citySlug)??$cities->default();
+$city=$cities->find($citySlug);
+if(!$city||empty($city['active'])){http_response_code(404);exit('City not available');}
 $v=$verticals->find($slug);
 if(!$v){http_response_code(404);exit('Category not found');}
 $detail=vertical_detail($slug);
