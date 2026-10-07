@@ -70,7 +70,7 @@ page_header('Pune, edited for better decisions');
       [$slug,$label,$copy]=$row;$v=$verticals->find($slug);
     ?>
     <a class="intent" style="--accent:<?=e($v['accent'])?>" href="<?=e(vertical_url($slug))?>">
-      <div class="intent-top"><span class="icon-tile"><?=ExCompassSupportIcon::svg($v['icon'])?></span><span class="intent-number">0<?=$i+1?></span></div>
+      <div class="intent-top"><span class="icon-tile"><?=icon_svg($v['icon'])?></span><span class="intent-number">0<?=$i+1?></span></div>
       <div><b><?=e($label)?></b><small><?=e($copy)?></small></div><span class="intent-arrow">→</span>
     </a>
     <?php endforeach; ?>
@@ -98,7 +98,7 @@ page_header('Pune, edited for better decisions');
   <div class="vertical-grid">
     <?php foreach($all as $v):$x=$tops[$v['slug']]??null; ?>
     <a class="vertical-card" style="--accent:<?=e($v['accent'])?>" href="<?=e(vertical_url($v['slug']))?>">
-      <span class="icon-tile"><?=ExCompassSupportIcon::svg($v['icon'])?></span>
+      <span class="icon-tile"><?=icon_svg($v['icon'])?></span>
       <div><b><?=e($v['name'])?></b><small><?=e($v['prompt'])?></small><?php if($x):?><em>Leading now · <?=e($x['name'])?></em><?php endif;?></div><i>→</i>
     </a>
     <?php endforeach; ?>
