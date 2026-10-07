@@ -7,6 +7,7 @@ $citySlug=current_city_slug();
 $areaSlug=current_area_slug();
 $city=$cities->find($citySlug);
 $v=$verticals->find($slug);
+if(!$city||empty($city['active'])){http_response_code(404);page_header('City not available');echo '<main id="content" class="shell section"><h1>City not available</h1></main>';page_footer();exit;}
 if(!$v){http_response_code(404);page_header('Category not found');echo '<main id="content" class="shell section"><h1>Category not found</h1></main>';page_footer();exit;}
 $detail=vertical_detail($slug);
 $ranked=$ranking->rank(published_for_vertical($slug,$citySlug,$areaSlug));
