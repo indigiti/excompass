@@ -18,6 +18,7 @@ foreach ($items as $item) {
 }
 $audit = new JsonAuditLog($store);
 $recent = $audit->recent(8);
+$leadCount = $access->allows($user,'leads.view') ? count($store->read('leads.json', [])) : 0;
 admin_header('Dashboard', $user);
 ?>
 <div class="admin-page-head"><div><span>WORKSPACE</span><h1>Editorial dashboard</h1></div><a class="admin-primary" href="<?=e(u('admin/entity.php?new=1'))?>">+ New entity</a></div>
@@ -27,6 +28,7 @@ admin_header('Dashboard', $user);
   <a href="<?=e(u('admin/entities.php?status=draft'))?>"><b><?=$counts['draft']?></b><span>Draft</span></a>
   <a href="<?=e(u('admin/entities.php?status=review'))?>"><b><?=$counts['review']?></b><span>Needs review</span></a>
   <a href="<?=e(u('admin/entities.php?status=published'))?>"><b><?=$counts['published']?></b><span>Published</span></a>
+  <?php if($access->allows($user,'leads.view')):?><a href="<?=e(u('admin/leads.php'))?>"><b><?=$leadCount?></b><span>Enquiries</span></a><?php endif;?>
 </div>
 <div class="admin-grid">
 <section class="admin-panel"><div class="admin-panel-head"><h2>Workflow</h2></div><div class="workflow-line"><span>Research</span><i>→</i><span>Review</span><i>→</i><span>Approve</span><i>→</i><span>Publish</span></div><p>Role-based transitions prevent commercial users or researchers from directly publishing rankings.</p></section>
