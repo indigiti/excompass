@@ -196,7 +196,7 @@ function page_header(string $title): void {
         <a class="city-chip" href="<?=e(city_url((string)$city['slug']))?>" aria-label="Current city <?=e((string)$city['name'])?>"><span>⌖</span><b><?=e((string)$city['name'])?></b><?php if(count($cities->active())>1):?><i>⌄</i><?php endif;?></a>
         <nav class="primary-nav" aria-label="Primary navigation">
           <a href="<?=e(u())?>">Discover</a>
-          <a href="<?=e(vertical_url('localities'))?>">Neighbourhoods</a>
+          <a href="<?=e(vertical_url('localities',(string)$city['slug']))?>">Neighbourhoods</a>
           <a href="<?=e(u('methodology.php'))?>">Methodology</a>
         </nav>
         <form class="nav-search" action="<?=e(u('search.php'))?>" method="get" role="search">
@@ -207,10 +207,10 @@ function page_header(string $title): void {
         <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" data-nav-toggle>☰</button>
       </div>
       <div class="mobile-nav" data-mobile-nav>
-        <a href="<?=e(u())?>">Discover</a><a href="<?=e(vertical_url('localities'))?>">Neighbourhoods</a><a href="<?=e(u('methodology.php'))?>">Methodology</a><a href="<?=e(u('search.php'))?>">Search</a>
+        <a href="<?=e(city_url((string)$city['slug']))?>">Discover <?=e((string)$city['name'])?></a><a href="<?=e(vertical_url('localities',(string)$city['slug']))?>">Neighbourhoods</a><a href="<?=e(u('methodology.php'))?>">Methodology</a><a href="<?=e(u('search.php'))?>">Search</a>
       </div>
     </header>
-    <div class="rail" aria-label="Explore categories"><div class="rail-inner"><?php foreach($verticals->all() as $v):$isActive=$activeVertical===$v['slug']; ?><a class="<?=$isActive?'is-active':''?>" <?=$isActive?'aria-current="page"':''?> style="--accent:<?=e($v['accent'])?>" href="<?=e(vertical_url($v['slug']))?>"><span><?=Icon::svg($v['icon'])?></span><small><?=e($v['name'])?></small></a><?php endforeach; ?></div></div>
+    <div class="rail" aria-label="Explore categories"><div class="rail-inner"><?php foreach($verticals->all() as $v):$isActive=$activeVertical===$v['slug']; ?><a class="<?=$isActive?'is-active':''?>" <?=$isActive?'aria-current="page"':''?> style="--accent:<?=e($v['accent'])?>" href="<?=e(vertical_url($v['slug'],(string)$city['slug']))?>"><span><?=Icon::svg($v['icon'])?></span><small><?=e($v['name'])?></small></a><?php endforeach; ?></div></div>
     <?php
 }
 function page_footer(): void {
