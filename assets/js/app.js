@@ -75,6 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const modal = document.querySelector('[data-lead-modal]');
   const openModal = (button) => {
     if (!modal) return;
+    const cityField = modal.querySelector('[data-lead-city]');
+    if (cityField) cityField.value = button.dataset.city || cityField.value || '';
     modal.querySelector('[data-lead-vertical]').value = button.dataset.vertical || '';
     modal.querySelector('[data-lead-entity]').value = button.dataset.entity || '';
     modal.querySelector('[data-lead-type]').value = button.dataset.type || 'enquiry';
@@ -119,7 +121,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const selected = compareBoxes.filter((box) => box.checked).map((box) => box.dataset.slug);
     if (selected.length < 2) return;
     const vertical = dock.dataset.vertical || '';
+    const city = dock.dataset.city || '';
+    const area = dock.dataset.area || '';
     const base = window.location.pathname.includes('/excompass/') ? '/excompass/' : '/';
-    window.location.href = base + 'compare.php?vertical=' + encodeURIComponent(vertical) + '&items=' + encodeURIComponent(selected.join(','));
+    const params = new URLSearchParams({ vertical, items: selected.join(',') });
+    if (city) params.set('city', city);
+    if (area) params.set('area', area);
+    window.location.href = base + 'compare.php?' + params.toString();
   });
 });
