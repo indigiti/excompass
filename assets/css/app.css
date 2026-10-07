@@ -669,3 +669,9 @@ input,select,textarea,button{color-scheme:light}
   .media-source-line{display:block}
   .media-source-line a{display:inline-block;margin-top:4px}
 }
+
+.selection-card .selection-photo{z-index:0;opacity:.7;filter:saturate(.75) contrast(1.05) brightness(.62)}
+.selection-card:before{z-index:1}
+.selection-card:after{z-index:2}
+.selection-card .selection-meta,.selection-card .selection-copy,.selection-card .selection-score,.selection-card .selection-link{z-index:3}
+.selection-card:hover .selection-photo{transform:scale(1.035)}
